@@ -1,22 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --ink: #171715;
-  --paper: #f8f5ef;
-  --ivory: #fffaf2;
-  --sand: #ded5c8;
-  --clay: #a74734;
-  --olive: #6d735e;
-  --charcoal: #24231f;
-  --muted: #6f6a61;
-  --line: #d8d0c4;
+  --ink: #111111;
+  --paper: #ffffff;
+  --bone: #f4f3f1;
+  --line: #e4e2de;
+  --muted: #6e6e6e;
+  --charcoal: #141414;
   --white: #ffffff;
-  --surface: var(--sand);
+
+  /* Error/alert only from here on, not a brand accent. */
+  --clay: #a74734;
   --rust: var(--clay);
-  --sage: var(--olive);
-  --shadow: 0 24px 70px rgba(23, 23, 21, .12);
+
+  /* Legacy token names kept as aliases onto the new neutral palette, so
+     shop.css/product.css/checkout.css/admin.css keep resolving correctly
+     without needing simultaneous edits. */
+  --ivory: var(--bone);
+  --sand: var(--bone);
+  --surface: var(--bone);
+  --olive: var(--muted);
+  --sage: var(--muted);
+
+  --shadow: 0 30px 90px rgba(0, 0, 0, .06);
   --sans: 'DM Sans', Arial, sans-serif;
-  --serif: 'Playfair Display', Georgia, serif;
+  --serif: var(--sans);
 }
 
 * {
@@ -56,7 +64,7 @@ img {
 }
 
 :focus-visible {
-  outline: 2px solid var(--clay);
+  outline: 2px solid var(--ink);
   outline-offset: 4px;
 }
 
@@ -133,7 +141,7 @@ img {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--clay);
+  background: var(--ink);
   color: var(--white);
   font-size: 11px;
   font-weight: 700;
@@ -198,7 +206,7 @@ img {
 
 .eyebrow {
   margin: 0 0 18px;
-  color: var(--clay);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .16em;
@@ -215,20 +223,22 @@ p {
 h1,
 h2 {
   font-family: var(--serif);
-  line-height: .98;
+  line-height: 1.05;
 }
 
 h1 {
   max-width: 760px;
   margin-bottom: 28px;
-  font-size: clamp(54px, 7vw, 116px);
-  letter-spacing: -.02em;
+  font-size: clamp(40px, 5.2vw, 84px);
+  font-weight: 500;
+  letter-spacing: -.01em;
 }
 
 h2 {
   max-width: 760px;
   margin-bottom: 0;
-  font-size: clamp(36px, 5vw, 72px);
+  font-size: clamp(30px, 3.6vw, 52px);
+  font-weight: 500;
   letter-spacing: -.01em;
 }
 
@@ -269,8 +279,9 @@ h2 {
 }
 
 .button:hover {
-  border-color: var(--clay);
-  color: var(--clay);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .button:disabled {
@@ -286,9 +297,10 @@ h2 {
 }
 
 .button-dark:hover {
-  background: var(--clay);
-  border-color: var(--clay);
-  color: var(--white);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  opacity: .8;
 }
 
 .button-light {
@@ -298,9 +310,9 @@ h2 {
 }
 
 .button-light:hover {
-  background: var(--clay);
-  color: var(--white);
-  border-color: var(--clay);
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--paper);
 }
 
 .hero-media {
@@ -423,7 +435,7 @@ h2 {
 
 .product-info p {
   margin-bottom: 4px;
-  color: var(--clay);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .12em;
@@ -479,13 +491,13 @@ h2 {
 }
 
 .promo-content .eyebrow {
-  color: #e8b9ac;
+  color: #cfcfcf;
 }
 
 .promo-content p:not(.eyebrow) {
   max-width: 470px;
   margin: 28px 0 36px;
-  color: #d6d0c4;
+  color: #b3b3b3;
   font-size: 18px;
 }
 
@@ -536,7 +548,7 @@ h2 {
 
 .cart-link:hover,
 .back-link:hover {
-  color: var(--clay);
+  text-decoration: underline;
 }
 
 .cart-link span {
@@ -621,7 +633,7 @@ h2 {
 .why-grid span {
   display: block;
   margin-bottom: 48px;
-  color: var(--clay);
+  color: var(--muted);
   font-weight: 700;
 }
 
