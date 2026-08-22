@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop | SLIDESOL</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <noscript><style>[data-reveal] { opacity: 1; transform: none; }</style></noscript>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="index.html">SLIDESOL</a>
+    <nav>
+      <a class="active" href="shop.html">Shop</a>
+      <a href="shop.html?brand=nike">Nike</a>
+      <a href="shop.html?brand=crocs">Crocs</a>
+      <a href="shop.html?brand=birkenstock">Birkenstock</a>
+    </nav>
+    <a class="cart-link" href="checkout.html">Bag <span data-cart-count>0</span></a>
+  </header>
+
+  <main class="shop-page">
+    <section class="page-heading" data-reveal>
+      <div>
+        <p class="eyebrow">The slipper edit</p>
+        <h1>Premium comfort, selected with intent.</h1>
+      </div>
+      <p>Shop slides, clogs and recovery slippers from the brands people actually want to wear.</p>
+    </section>
+
+    <section class="shop-toolbar" aria-label="Product filters">
+      <div class="filters" data-brand-filters></div>
+
+      <div class="toolbar-controls">
+        <span id="product-count" aria-live="polite"></span>
+
+        <div class="toolbar-inputs">
+          <div class="search-field">
+            <label class="visually-hidden" for="product-search">Search products</label>
+            <input type="search" id="product-search" name="q" placeholder="Search products or brands..." autocomplete="off">
+          </div>
+
+          <div class="sort-field">
+            <label class="visually-hidden" for="product-sort">Sort by</label>
+            <select id="product-sort" name="sort">
+              <option value="newest">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-grid" id="product-grid" aria-live="polite"></section>
+  </main>
+
+  <script type="module" src="js/store/products.js"></script>
+  <script type="module" src="js/store/cart.js"></script>
+  <script type="module" src="js/motion.js"></script>
+</body>
+</html>
