@@ -47,23 +47,30 @@ export const ORDER_PAYMENT_STATUS = {
   FAILED: 'failed',
 } as const;
 
-// PENDING/PROCESSING are set automatically by create-order/the webhook. SHIPPED,
-// FULFILLED and CANCELLED are the values an admin can move an order through manually
-// (admin-orders) — no enum was given for order_status, so this vocabulary is an
-// assumption, easy to extend here if a different set of stages is wanted.
+// PENDING/PROCESSING are set automatically by create-order/the webhook. The rest are the
+// values an admin can move an order through manually (admin-orders), matching the live
+// database's order_status CHECK constraint exactly — it distinguishes delivery orders
+// (READY -> OUT_FOR_DELIVERY -> DELIVERED) from pickup orders (READY -> READY_FOR_PICKUP
+// -> PICKED_UP).
 export const ORDER_STATUS = {
   PENDING: 'pending',
   PROCESSING: 'processing',
-  SHIPPED: 'shipped',
-  FULFILLED: 'fulfilled',
+  READY: 'ready',
+  OUT_FOR_DELIVERY: 'out_for_delivery',
+  DELIVERED: 'delivered',
+  READY_FOR_PICKUP: 'ready_for_pickup',
+  PICKED_UP: 'picked_up',
   CANCELLED: 'cancelled',
 } as const;
 
 export const ADMIN_SETTABLE_ORDER_STATUSES: string[] = [
   ORDER_STATUS.PENDING,
   ORDER_STATUS.PROCESSING,
-  ORDER_STATUS.SHIPPED,
-  ORDER_STATUS.FULFILLED,
+  ORDER_STATUS.READY,
+  ORDER_STATUS.OUT_FOR_DELIVERY,
+  ORDER_STATUS.DELIVERED,
+  ORDER_STATUS.READY_FOR_PICKUP,
+  ORDER_STATUS.PICKED_UP,
   ORDER_STATUS.CANCELLED,
 ];
 

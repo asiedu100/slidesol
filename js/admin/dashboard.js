@@ -4,8 +4,11 @@ import { listProducts, listBrands, listOrders, listCustomers } from './api-clien
 const ORDER_STATUS_BADGE = {
   pending: 'pending',
   processing: 'processing',
-  shipped: 'shipped',
-  fulfilled: 'fulfilled',
+  ready: 'ready',
+  out_for_delivery: 'out_for_delivery',
+  delivered: 'delivered',
+  ready_for_pickup: 'ready_for_pickup',
+  picked_up: 'picked_up',
   cancelled: 'cancelled',
 };
 
@@ -42,7 +45,7 @@ const renderRecentOrders = (orders) => {
     const statusCell = document.createElement('td');
     const badge = document.createElement('span');
     badge.className = `badge badge--${ORDER_STATUS_BADGE[order.order_status] ?? 'pending'}`;
-    badge.textContent = order.order_status;
+    badge.textContent = String(order.order_status).replace(/_/g, ' ');
     statusCell.appendChild(badge);
 
     const paymentCell = document.createElement('td');

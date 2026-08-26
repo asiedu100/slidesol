@@ -151,10 +151,10 @@ body { font-family: var(--font-sans); }
   letter-spacing: 0.04em;
 }
 
-.badge--active, .badge--paid, .badge--fulfilled { background: color-mix(in srgb, #2E7D32 15%, transparent); color: #2E7D32; }
+.badge--active, .badge--paid, .badge--delivered, .badge--picked_up { background: color-mix(in srgb, #2E7D32 15%, transparent); color: #2E7D32; }
 .badge--inactive, .badge--cancelled, .badge--failed { background: color-mix(in srgb, var(--color-rust) 15%, transparent); color: var(--color-rust); }
-.badge--pending, .badge--processing { background: color-mix(in srgb, var(--color-clay) 18%, transparent); color: var(--color-clay); }
-.badge--shipped { background: color-mix(in srgb, #1565C0 15%, transparent); color: #1565C0; }
+.badge--pending, .badge--processing, .badge--ready { background: color-mix(in srgb, var(--color-clay) 18%, transparent); color: var(--color-clay); }
+.badge--out_for_delivery, .badge--ready_for_pickup { background: color-mix(in srgb, #1565C0 15%, transparent); color: #1565C0; }
 
 .admin-toolbar { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 

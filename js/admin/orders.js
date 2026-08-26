@@ -8,7 +8,15 @@ const showAlert = (el, message, type = 'error') => {
   el.hidden = false;
 };
 
-const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'fulfilled', 'cancelled'];
+// Kept in sync manually with supabase/functions/_shared/constants.ts's ORDER_STATUS —
+// matches the live database's order_status CHECK constraint, which distinguishes delivery
+// orders from pickup orders past the "ready" stage.
+const ORDER_STATUSES_BY_FULFILMENT = {
+  delivery: ['pending', 'processing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'],
+  pickup: ['pending', 'processing', 'ready', 'ready_for_pickup', 'picked_up', 'cancelled'],
+};
+
+const formatStatusLabel = (status) => status.replace(/_/g, ' ');
 
 // ==========================================================================
 // Orders list — admin/orders.html
@@ -53,7 +61,7 @@ export const initOrdersListPage = async () => {
       const statusCell = document.createElement('td');
       const statusBadge = document.createElement('span');
       statusBadge.className = `badge badge--${order.order_status}`;
-      statusBadge.textContent = order.order_status;
+      statusBadge.textContent = formatStatusLabel(order.order_status);
       statusCell.appendChild(statusBadge);
 
       const paymentCell = document.createElement('td');
@@ -146,10 +154,11 @@ export const initOrderDetailPage = async () => {
 
   const statusSelect = document.querySelector('[data-order-status-select]');
   if (statusSelect) {
-    ORDER_STATUSES.forEach((status) => {
+    const statuses = ORDER_STATUSES_BY_FULFILMENT[order.fulfilment_method] ?? ORDER_STATUSES_BY_FULFILMENT.delivery;
+    statuses.forEach((status) => {
       const option = document.createElement('option');
       option.value = status;
-      option.textContent = status;
+      option.textContent = formatStatusLabel(status);
       option.selected = status === order.order_status;
       statusSelect.appendChild(option);
     });
