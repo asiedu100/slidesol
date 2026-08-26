@@ -1,102 +1,218 @@
 import { formatMoney } from '../config.js';
-import { listOrders, updateOrderStatus } from './orders-api.js';
+import { listOrders, getOrder, updateOrderStatus, listCustomers } from './api-client.js';
 
-const ORDER_STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'fulfilled', 'cancelled'];
-
-const escapeHtml = (value = '') => String(value)
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;')
-  .replaceAll("'", '&#039;');
-
-const renderState = (tbody, message) => {
-  tbody.innerHTML = `<tr><td colspan="7" class="empty-admin">${escapeHtml(message)}</td></tr>`;
+const showAlert = (el, message, type = 'error') => {
+  if (!el) return;
+  el.textContent = message;
+  el.className = `admin-alert admin-alert--${type}`;
+  el.hidden = false;
 };
 
-const paymentStatusClass = (status) => {
-  if (status === 'paid') return '';
-  if (status === 'failed') return 'status-failed';
-  return 'status-inactive';
-};
+const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'fulfilled', 'cancelled'];
 
-const formatDate = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+// ==========================================================================
+// Orders list — admin/orders.html
+// ==========================================================================
 
-const rowTemplate = (order) => {
-  const customerName = order.customers?.full_name || 'Guest';
-  const customerPhone = order.customers?.phone || '';
-  const statusOptions = ORDER_STATUS_OPTIONS
-    .map((value) => `<option value="${value}" ${value === order.order_status ? 'selected' : ''}>${value}</option>`)
-    .join('');
-
-  return `
-    <tr data-order-row="${escapeHtml(order.id)}">
-      <td><a href="order-detail.html?id=${encodeURIComponent(order.id)}">${escapeHtml(order.order_number)}</a></td>
-      <td><strong>${escapeHtml(customerName)}</strong><small>${escapeHtml(customerPhone)}</small></td>
-      <td>${escapeHtml(order.item_count)}</td>
-      <td>${formatMoney(order.total_amount)}</td>
-      <td><span class="status ${paymentStatusClass(order.payment_status)}">${escapeHtml(order.payment_status)}</span></td>
-      <td><select data-order-status-select="${escapeHtml(order.id)}">${statusOptions}</select></td>
-      <td>${formatDate(order.created_at)}</td>
-    </tr>
-  `;
-};
-
-const wireStatusSelects = (tbody) => {
-  tbody.querySelectorAll('[data-order-status-select]').forEach((select) => {
-    select.addEventListener('change', async () => {
-      const previousValue = select.dataset.previousValue || select.value;
-      select.disabled = true;
-
-      try {
-        await updateOrderStatus(select.dataset.orderStatusSelect, select.value);
-        select.dataset.previousValue = select.value;
-      } catch (error) {
-        // eslint-disable-next-line no-alert
-        window.alert(error.message);
-        select.value = previousValue;
-      } finally {
-        select.disabled = false;
-      }
-    });
-    select.dataset.previousValue = select.value;
-  });
-};
-
-const renderFilterBanner = (customerId, orders) => {
-  const banner = document.querySelector('[data-orders-filter-banner]');
-  if (!banner) return;
-
-  if (!customerId) {
-    banner.innerHTML = '';
-    return;
-  }
-
-  const name = orders[0]?.customers?.full_name || 'this customer';
-  banner.innerHTML = `<p>Showing orders for <strong>${escapeHtml(name)}</strong> — <a class="text-link" href="orders.html">Clear filter</a></p>`;
-};
-
-export const renderAdminOrders = async (selector = '#admin-orders') => {
-  const tbody = document.querySelector(selector);
-  if (!tbody) return;
-
+export const initOrdersListPage = async () => {
+  const tbody = document.querySelector('[data-orders-table]');
+  const empty = document.querySelector('[data-orders-empty]');
+  const errorEl = document.querySelector('[data-admin-error]');
+  const filterNote = document.querySelector('[data-orders-filter-note]');
   const customerId = new URLSearchParams(window.location.search).get('customer_id');
 
-  renderState(tbody, 'Loading orders…');
+  if (customerId && filterNote) {
+    filterNote.hidden = false;
+  }
 
   try {
-    const { orders } = await listOrders(customerId);
-
-    renderFilterBanner(customerId, orders);
-
-    if (!orders.length) {
-      renderState(tbody, customerId ? 'This customer has no orders.' : 'No orders have been placed yet.');
+    const { orders } = await listOrders(customerId || undefined);
+    if (orders.length === 0) {
+      if (empty) empty.hidden = false;
       return;
     }
 
-    tbody.innerHTML = orders.map(rowTemplate).join('');
-    wireStatusSelects(tbody);
+    orders.forEach((order) => {
+      const row = document.createElement('tr');
+
+      const numberCell = document.createElement('td');
+      const link = document.createElement('a');
+      link.href = `order-detail.html?id=${encodeURIComponent(order.id)}`;
+      link.textContent = order.order_number;
+      numberCell.appendChild(link);
+
+      const customerCell = document.createElement('td');
+      customerCell.textContent = order.customers?.full_name ?? '—';
+
+      const itemsCell = document.createElement('td');
+      itemsCell.textContent = String(order.item_count);
+
+      const totalCell = document.createElement('td');
+      totalCell.textContent = formatMoney(order.total_amount);
+
+      const statusCell = document.createElement('td');
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `badge badge--${order.order_status}`;
+      statusBadge.textContent = order.order_status;
+      statusCell.appendChild(statusBadge);
+
+      const paymentCell = document.createElement('td');
+      const paymentBadge = document.createElement('span');
+      paymentBadge.className = `badge badge--${order.payment_status}`;
+      paymentBadge.textContent = order.payment_status;
+      paymentCell.appendChild(paymentBadge);
+
+      const dateCell = document.createElement('td');
+      dateCell.textContent = new Date(order.created_at).toLocaleDateString();
+
+      row.append(numberCell, customerCell, itemsCell, totalCell, statusCell, paymentCell, dateCell);
+      tbody?.appendChild(row);
+    });
   } catch (error) {
-    renderState(tbody, error.message || 'Could not load orders.');
+    showAlert(errorEl, error.message);
+  }
+};
+
+// ==========================================================================
+// Order detail — admin/order-detail.html
+// ==========================================================================
+
+export const initOrderDetailPage = async () => {
+  const id = new URLSearchParams(window.location.search).get('id');
+  const errorEl = document.querySelector('[data-admin-error]');
+  const notFoundEl = document.querySelector('[data-order-not-found]');
+  const contentEl = document.querySelector('[data-order-content]');
+
+  if (!id) {
+    if (notFoundEl) notFoundEl.hidden = false;
+    return;
+  }
+
+  let data;
+  try {
+    data = await getOrder(id);
+  } catch (error) {
+    if (notFoundEl) notFoundEl.hidden = false;
+    return;
+  }
+
+  if (contentEl) contentEl.hidden = false;
+  const { order, items, payment } = data;
+
+  document.querySelector('[data-order-number]').textContent = order.order_number;
+  document.querySelector('[data-order-created]').textContent = new Date(order.created_at).toLocaleString();
+  document.querySelector('[data-order-customer-name]').textContent = order.customers?.full_name ?? '—';
+  document.querySelector('[data-order-customer-phone]').textContent = order.customers?.phone ?? '—';
+  document.querySelector('[data-order-customer-email]').textContent = order.customers?.email ?? '—';
+  document.querySelector('[data-order-fulfilment]').textContent = order.fulfilment_method;
+
+  const addressEl = document.querySelector('[data-order-address]');
+  if (addressEl) {
+    addressEl.textContent = order.fulfilment_method === 'delivery'
+      ? [order.delivery_address, order.delivery_area, order.delivery_city, order.delivery_region].filter(Boolean).join(', ')
+      : 'Pickup — no delivery address';
+  }
+
+  document.querySelector('[data-order-note]').textContent = order.customer_note || '—';
+  document.querySelector('[data-order-subtotal]').textContent = formatMoney(order.subtotal);
+  document.querySelector('[data-order-delivery-fee]').textContent = formatMoney(order.delivery_fee);
+  document.querySelector('[data-order-total]').textContent = formatMoney(order.total_amount);
+
+  const paymentStatusBadge = document.querySelector('[data-order-payment-status]');
+  if (paymentStatusBadge) {
+    paymentStatusBadge.className = `badge badge--${order.payment_status}`;
+    paymentStatusBadge.textContent = order.payment_status;
+  }
+
+  const paymentRefEl = document.querySelector('[data-order-payment-ref]');
+  if (paymentRefEl) paymentRefEl.textContent = payment?.transaction_reference ?? '—';
+
+  const itemsBody = document.querySelector('[data-order-items]');
+  items.forEach((item) => {
+    const row = document.createElement('tr');
+    const productCell = document.createElement('td');
+    productCell.textContent = `${item.brand_name} ${item.product_name}`;
+    const variantCell = document.createElement('td');
+    variantCell.textContent = `${item.colour_name}, Size ${item.size}`;
+    const qtyCell = document.createElement('td');
+    qtyCell.textContent = String(item.quantity);
+    const priceCell = document.createElement('td');
+    priceCell.textContent = formatMoney(item.unit_price);
+    const subtotalCell = document.createElement('td');
+    subtotalCell.textContent = formatMoney(item.subtotal);
+    row.append(productCell, variantCell, qtyCell, priceCell, subtotalCell);
+    itemsBody?.appendChild(row);
+  });
+
+  const statusSelect = document.querySelector('[data-order-status-select]');
+  if (statusSelect) {
+    ORDER_STATUSES.forEach((status) => {
+      const option = document.createElement('option');
+      option.value = status;
+      option.textContent = status;
+      option.selected = status === order.order_status;
+      statusSelect.appendChild(option);
+    });
+  }
+
+  document.querySelector('[data-order-status-form]')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!statusSelect) return;
+    const submitButton = event.target.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      await updateOrderStatus(id, statusSelect.value);
+      showAlert(errorEl, 'Order status updated.', 'success');
+    } catch (error) {
+      showAlert(errorEl, error.message);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+};
+
+// ==========================================================================
+// Customers — admin/customers.html
+// ==========================================================================
+
+export const initCustomersPage = async () => {
+  const tbody = document.querySelector('[data-customers-table]');
+  const empty = document.querySelector('[data-customers-empty]');
+  const errorEl = document.querySelector('[data-admin-error]');
+
+  try {
+    const { customers } = await listCustomers();
+    if (customers.length === 0) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+
+    customers.forEach((customer) => {
+      const row = document.createElement('tr');
+
+      const nameCell = document.createElement('td');
+      nameCell.textContent = customer.full_name;
+
+      const phoneCell = document.createElement('td');
+      phoneCell.textContent = customer.phone;
+
+      const emailCell = document.createElement('td');
+      emailCell.textContent = customer.email ?? '—';
+
+      const ordersCell = document.createElement('td');
+      const ordersLink = document.createElement('a');
+      ordersLink.href = `orders.html?customer_id=${encodeURIComponent(customer.id)}`;
+      ordersLink.textContent = String(customer.order_count);
+      ordersCell.appendChild(ordersLink);
+
+      const spentCell = document.createElement('td');
+      spentCell.textContent = formatMoney(customer.total_spent);
+
+      row.append(nameCell, phoneCell, emailCell, ordersCell, spentCell);
+      tbody?.appendChild(row);
+    });
+  } catch (error) {
+    showAlert(errorEl, error.message);
   }
 };

@@ -12,8 +12,7 @@ export const supabase = isSupabaseConfigured()
 
 export const requireSupabase = () => {
   if (!supabase) {
-    throw new Error('Supabase is not configured. Add your project URL and anon key in js/config.js.');
+    throw new Error('Supabase is not configured. Check js/config.js.');
   }
-
   return supabase;
 };

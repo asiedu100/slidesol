@@ -3,7 +3,9 @@ import { errorResponse, jsonResponse } from '../_shared/http.ts';
 import { isForeignKeyViolation } from '../_shared/pg-error.ts';
 import { isNonEmptyString, parseJsonBody, UUID_RE } from './validation.ts';
 
-const IMAGE_SELECT = 'id, product_id, colour_id, image_url, alt_text, sort_order, created_at';
+const IMAGE_SELECT = 'id, product_id, colour_id, image_url, alt_text, sort_order, shot_angle, created_at';
+const SHOT_ANGLES = ['hero', 'side', 'top', 'back'];
+const isShotAngle = (value: unknown): value is string => typeof value === 'string' && SHOT_ANGLES.includes(value);
 const BUCKET = 'product-images';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
@@ -61,6 +63,12 @@ export const create = async (supabase: SupabaseClient, req: Request, productId: 
     sortOrder = parsed;
   }
 
+  const shotAngleRaw = form.get('shot_angle');
+  if (shotAngleRaw !== null && shotAngleRaw !== '' && !isShotAngle(shotAngleRaw)) {
+    return errorResponse(400, 'validation_error', 'shot_angle must be one of hero, side, top, back.');
+  }
+  const shotAngle = isShotAngle(shotAngleRaw) ? shotAngleRaw : null;
+
   const { data: colour, error: colourError } = await supabase
     .from('product_colours')
     .select('id')
@@ -108,6 +116,7 @@ export const create = async (supabase: SupabaseClient, req: Request, productId: 
       image_url: publicUrlData.publicUrl,
       alt_text: altText,
       sort_order: sortOrder,
+      shot_angle: shotAngle,
     })
     .select(IMAGE_SELECT)
     .single();
@@ -139,6 +148,13 @@ export const update = async (supabase: SupabaseClient, req: Request, id: string)
   if (body.sort_order !== undefined) {
     if (!isNonNegativeInteger(body.sort_order)) return errorResponse(400, 'validation_error', 'Sort order must be a non-negative whole number.');
     patch.sort_order = body.sort_order;
+  }
+
+  if (body.shot_angle !== undefined) {
+    if (body.shot_angle !== null && !isShotAngle(body.shot_angle)) {
+      return errorResponse(400, 'validation_error', 'shot_angle must be one of hero, side, top, back.');
+    }
+    patch.shot_angle = body.shot_angle;
   }
 
   if (Object.keys(patch).length === 0) {

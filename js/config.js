@@ -9,8 +9,6 @@ export const functionUrl = (name) => `${SUPABASE_URL}/functions/v1/${name}`;
 export const isSupabaseConfigured = () => (
   SUPABASE_URL.startsWith('https://')
   && SUPABASE_ANON_KEY.length > 30
-  && !SUPABASE_URL.includes('YOUR_')
-  && !SUPABASE_ANON_KEY.includes('YOUR_')
 );
 
 export const formatMoney = (amount) => new Intl.NumberFormat('en-GH', {
@@ -37,12 +35,14 @@ export const GHANA_REGIONS = [
   'Western North',
 ];
 
+export const MAX_ITEM_QUANTITY = 20;
+
 // Mirrors supabase/functions/_shared/constants.ts's getDeliveryFee() for the checkout
-// preview only — kept in sync manually, same as GHANA_REGIONS, since there's no shared
-// module between this plain-JS frontend and the Deno Edge Functions. The actual charged
-// fee always comes from create-order's response; this number is never trusted as final.
-export const DELIVERY_FEE_GREATER_ACCRA_GHS = 20;
-export const DELIVERY_FEE_OTHER_REGIONS_GHS = 40;
+// preview only — kept in sync manually since there's no shared module between this
+// plain-JS frontend and the Deno Edge Functions. The fee charged always comes from
+// create-order's response; this number is never trusted as final.
+const DELIVERY_FEE_GREATER_ACCRA_GHS = 20;
+const DELIVERY_FEE_OTHER_REGIONS_GHS = 40;
 
 export const estimateDeliveryFee = (fulfilmentMethod, region) => {
   if (fulfilmentMethod !== 'delivery') return 0;

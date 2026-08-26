@@ -1,1 +1,117 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Order | SLIDESOL Studio</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a href="index.html">Overview</a><a href="products.html">Products</a><a href="brands.html">Brands</a><a class="active" href="orders.html">Orders</a><a href="customers.html">Customers</a></nav><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><a class="back-link" href="orders.html">← Orders</a><p class="eyebrow">Order placed <span id="order-created-at"></span></p><h1 id="order-heading">Loading order…</h1><p class="form-notice" data-order-detail-notice role="alert"></p><section class="admin-panel"><div class="panel-heading"><h2>Status</h2></div><select id="order-status-select"></select></section><section class="admin-panel"><div class="panel-heading"><h2>Customer</h2></div><div id="order-customer"></div></section><section class="admin-panel"><div class="panel-heading"><h2>Fulfilment</h2></div><div id="order-fulfilment"></div></section><section class="admin-panel table-wrap"><div class="panel-heading"><h2>Items</h2></div><table><thead><tr><th>Product</th><th>Colour</th><th>Size</th><th>Qty</th><th>Unit price</th><th>Subtotal</th></tr></thead><tbody id="order-items"></tbody></table><div id="order-summary-totals"></div></section><section class="admin-panel"><div class="panel-heading"><h2>Payment</h2></div><div id="order-payment"></div></section></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { initOrderDetail } from '../js/admin/order-detail.js'; requireAdmin(() => initOrderDetail());</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field"><label for="email">Email</label><input type="email" id="email" name="email" required autocomplete="username"></div>
+        <div class="form-field"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html" aria-current="page">Orders</a>
+        <a href="customers.html">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head">
+        <h1>Order <span data-order-number></span></h1>
+        <a class="button-secondary" href="orders.html">← All Orders</a>
+      </div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+      <p class="admin-empty" data-order-not-found hidden>Order not found.</p>
+
+      <div data-order-content hidden>
+        <div class="admin-form-grid">
+          <div class="admin-card">
+            <h2>Customer</h2>
+            <p><strong>Name:</strong> <span data-order-customer-name></span></p>
+            <p><strong>Phone:</strong> <span data-order-customer-phone></span></p>
+            <p><strong>Email:</strong> <span data-order-customer-email></span></p>
+            <p><strong>Placed:</strong> <span data-order-created></span></p>
+          </div>
+
+          <div class="admin-card">
+            <h2>Fulfilment</h2>
+            <p><strong>Method:</strong> <span data-order-fulfilment></span></p>
+            <p><strong>Address:</strong> <span data-order-address></span></p>
+            <p><strong>Note:</strong> <span data-order-note></span></p>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h2>Items</h2>
+          <table class="admin-table">
+            <thead><tr><th>Product</th><th>Variant</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+            <tbody data-order-items></tbody>
+          </table>
+          <p class="admin-form-full admin-order-totals">
+            Subtotal: <strong data-order-subtotal></strong> ·
+            Delivery: <strong data-order-delivery-fee></strong> ·
+            Total: <strong data-order-total></strong>
+          </p>
+        </div>
+
+        <div class="admin-form-grid">
+          <div class="admin-card">
+            <h2>Payment</h2>
+            <p><strong>Status:</strong> <span data-order-payment-status></span></p>
+            <p><strong>Reference:</strong> <span data-order-payment-ref></span></p>
+            <p class="admin-empty admin-empty--inline">Payment status is set automatically by Paystack and can't be edited here.</p>
+          </div>
+
+          <div class="admin-card">
+            <h2>Order Status</h2>
+            <form data-order-status-form class="admin-form-grid" novalidate>
+              <div class="form-field admin-form-full">
+                <label for="order-status">Status</label>
+                <select id="order-status" data-order-status-select></select>
+              </div>
+              <button type="submit" class="button-primary admin-form-submit">Update Status</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin } from '../js/admin/auth.js';
+    import { initOrderDetailPage } from '../js/admin/orders.js';
+
+    requireAdmin(() => {
+      initOrderDetailPage();
+    });
+  </script>
+</body>
+</html>

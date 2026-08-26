@@ -1,100 +1,66 @@
-import { SUPABASE_ANON_KEY, formatMoney, functionUrl } from '../config.js';
+import { functionUrl, SUPABASE_ANON_KEY, formatMoney } from '../config.js';
 
-const MAX_POLLS = 5;
-const POLL_INTERVAL_MS = 3000;
-
-const escapeHtml = (value = '') => String(value)
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;')
-  .replaceAll("'", '&#039;');
-
-const render = (container, state) => {
-  if (state.kind === 'no-reference') {
-    container.innerHTML = '<p>If you completed payment, check your phone or email for confirmation shortly.</p>';
-    return;
-  }
-
-  if (state.kind === 'loading') {
-    container.innerHTML = '<p>Checking your order status…</p>';
-    return;
-  }
-
-  if (state.kind === 'not-found') {
-    container.innerHTML = '<p>We couldn\'t find that order. If you completed payment, contact us with your reference.</p>';
-    return;
-  }
-
-  if (state.kind === 'error') {
-    container.innerHTML = '<p>Could not check your order status right now.</p>';
-    return;
-  }
-
-  const { order } = state;
-
-  if (order.payment_status === 'paid') {
-    container.innerHTML = `
-      <p>Order <strong>${escapeHtml(order.order_number)}</strong> is confirmed.</p>
-      <p>Total paid: ${formatMoney(order.total_amount)}</p>
-    `;
-    return;
-  }
-
-  if (order.payment_status === 'failed') {
-    container.innerHTML = `
-      <p>Payment for order <strong>${escapeHtml(order.order_number)}</strong> was not successful.</p>
-      <a class="text-link" href="checkout.html">Return to checkout -></a>
-    `;
-    return;
-  }
-
-  container.innerHTML = `<p>Confirming payment for order <strong>${escapeHtml(order.order_number)}</strong>…</p>`;
-};
+const POLL_INTERVAL_MS = 2500;
+const MAX_ATTEMPTS = 12; // ~30s of polling before falling back to a "still processing" state
 
 const fetchOrderStatus = async (reference) => {
-  try {
-    const response = await fetch(`${functionUrl('order-status')}?reference=${encodeURIComponent(reference)}`, {
-      headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-    });
+  const response = await fetch(`${functionUrl('order-status')}?reference=${encodeURIComponent(reference)}`, {
+    headers: {
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+  });
 
-    if (response.status === 404) return { kind: 'not-found' };
-    if (!response.ok) return { kind: 'error' };
-
-    const order = await response.json();
-    return { kind: 'order', order };
-  } catch {
-    return { kind: 'error' };
-  }
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || 'Could not find your order.');
+  return body;
 };
 
-const init = () => {
-  const container = document.querySelector('[data-order-status]');
-  if (!container) return;
+const showState = (name) => {
+  ['checking', 'paid', 'pending', 'failed', 'error'].forEach((state) => {
+    const el = document.querySelector(`[data-order-state="${state}"]`);
+    if (el) el.hidden = state !== name;
+  });
+};
 
-  const params = new URLSearchParams(window.location.search);
-  const reference = params.get('reference') || params.get('trxref');
+const populateOrderDetails = (order) => {
+  document.querySelectorAll('[data-order-number]').forEach((el) => { el.textContent = order.order_number; });
+  document.querySelectorAll('[data-order-total]').forEach((el) => { el.textContent = formatMoney(order.total_amount); });
+};
+
+const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+export const initOrderSuccessPage = async () => {
+  const reference = new URLSearchParams(window.location.search).get('reference');
 
   if (!reference) {
-    render(container, { kind: 'no-reference' });
+    showState('error');
     return;
   }
 
-  let pollCount = 0;
+  showState('checking');
 
-  const poll = async () => {
-    if (pollCount === 0) render(container, { kind: 'loading' });
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const order = await fetchOrderStatus(reference);
+      populateOrderDetails(order);
 
-    const result = await fetchOrderStatus(reference);
-    render(container, result);
-
-    if (result.kind === 'order' && result.order.payment_status === 'pending' && pollCount < MAX_POLLS) {
-      pollCount += 1;
-      setTimeout(poll, POLL_INTERVAL_MS);
+      if (order.payment_status === 'paid') {
+        showState('paid');
+        return;
+      }
+      if (order.payment_status === 'failed') {
+        showState('failed');
+        return;
+      }
+      // payment_status is still 'pending' -- the Paystack webhook hasn't landed yet, keep polling
+    } catch (error) {
+      showState('error');
+      return;
     }
-  };
 
-  poll();
+    await wait(POLL_INTERVAL_MS);
+  }
+
+  showState('pending');
 };
-
-init();

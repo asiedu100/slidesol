@@ -1,1 +1,70 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Orders | SLIDESOL Studio</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a href="index.html">Overview</a><a href="products.html">Products</a><a href="brands.html">Brands</a><a class="active" href="orders.html">Orders</a><a href="customers.html">Customers</a></nav><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><p class="eyebrow">Operations</p><h1>Orders</h1><div data-orders-filter-banner></div><section class="admin-panel table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead><tbody id="admin-orders"></tbody></table></section></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { renderAdminOrders } from '../js/admin/orders.js'; requireAdmin(() => renderAdminOrders());</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orders — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field"><label for="email">Email</label><input type="email" id="email" name="email" required autocomplete="username"></div>
+        <div class="form-field"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html" aria-current="page">Orders</a>
+        <a href="customers.html">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head"><h1>Orders</h1></div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+      <p class="admin-alert admin-alert--success" data-orders-filter-note hidden>Showing orders for one customer. <a href="orders.html">Clear filter</a></p>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th><th>Date</th></tr></thead>
+          <tbody data-orders-table></tbody>
+        </table>
+        <p class="admin-empty" data-orders-empty hidden>No orders yet.</p>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin } from '../js/admin/auth.js';
+    import { initOrdersListPage } from '../js/admin/orders.js';
+
+    requireAdmin(() => {
+      initOrdersListPage();
+    });
+  </script>
+</body>
+</html>

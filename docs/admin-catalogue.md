@@ -25,14 +25,14 @@ All JSON except image upload (`multipart/form-data`). Error shape is always `{er
 | DELETE | `/brands/:id` | **405** — brands can't be hard-deleted, deactivate instead |
 | GET / POST | `/products` | list (with brand + first image) / create |
 | GET | `/products/:id` | `{product, colours, variants, images}` — powers the edit page |
-| PATCH | `/products/:id` | partial update, incl. `is_active` |
+| PATCH | `/products/:id` | partial update, incl. `is_active`, `gender` |
 | DELETE | `/products/:id` | **405**, same reasoning as brands |
 | POST | `/products/:id/colours` | create |
-| PATCH / DELETE | `/colours/:id` | delete may 409 if variants/images still reference it |
+| PATCH / DELETE | `/colours/:id` | PATCH incl. `is_active` (per-colour "mark out of stock"); delete may 409 if variants/images still reference it |
 | POST | `/products/:id/variants` | create (`colour_id`, `size`, `stock_quantity`, ...) |
 | PATCH / DELETE | `/variants/:id` | PATCH also does the quick active-toggle; delete may 409 if ordered |
-| POST | `/products/:id/images` | multipart upload: `file`, `colour_id`, `alt_text?`, `sort_order?` |
-| PATCH / DELETE | `/images/:id` | PATCH = metadata only, no re-upload |
+| POST | `/products/:id/images` | multipart upload: `file`, `colour_id`, `alt_text?`, `sort_order?`, `shot_angle?` |
+| PATCH / DELETE | `/images/:id` | PATCH = metadata + `shot_angle` only, no re-upload |
 
 ## Deleting things
 
@@ -41,9 +41,12 @@ historical `order_items` — so those routes explicitly refuse deletion (`405`) 
 silently 404ing. `product_variants` also has `is_active` (used for the everyday
 deactivate action) but real deletion is still offered for correcting mistakes; if a
 variant has already been ordered, the delete fails with a `409` and a specific message
-instead of a raw error. `product_colours` and `product_images` have no `is_active`
-column at all, so deletion is their only removal path — deleting a colour that still has
-variants or images pointing at it gets the same clear `409` treatment.
+instead of a raw error. `product_colours` also gained an `is_active` flag (added for the
+"mark this whole colour out of stock" admin action — see `docs/admin-catalogue.md`'s
+sibling docs and the storefront's `isColourAvailable` logic in `js/store/products.js`),
+but deletion is still its only *removal* path — deleting a colour that still has variants
+or images pointing at it gets the same clear `409` treatment. `product_images` still has
+no `is_active` column, so deletion remains its only removal path too.
 
 ## Image upload
 

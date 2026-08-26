@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
     .select(`
       id, product_id, colour_id, size, stock_quantity, is_preorder_available, is_active,
       products ( id, name, slug, price, is_active, brand_id, brands ( id, name, is_active ) ),
-      product_colours ( id, name )
+      product_colours ( id, name, is_active )
     `)
     .in('id', variantIds);
 
@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     if (variant.product_id !== item.product_id) {
       return errorResponse(400, 'item_mismatch', 'One or more items in your bag could not be verified.');
     }
-    if (!variant.is_active || !product.is_active || !brand.is_active) {
+    if (!variant.is_active || !product.is_active || !brand.is_active || variant.product_colours?.is_active === false) {
       return errorResponse(400, 'item_unavailable', `${product.name} is no longer available.`);
     }
 

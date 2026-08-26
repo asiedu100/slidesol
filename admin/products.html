@@ -1,1 +1,74 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Products | SLIDESOL Studio</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a href="index.html">Overview</a><a class="active" href="products.html">Products</a><a href="brands.html">Brands</a><a href="orders.html">Orders</a><a href="customers.html">Customers</a></nav><a href="../shop.html" class="store-link">View store ↗</a><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><div class="admin-title"><div><p class="eyebrow">Catalog</p><h1>Products</h1></div><a class="button button-dark" href="product-form.html">Add product +</a></div><section class="admin-panel table-wrap"><table><thead><tr><th>Image</th><th>Product</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody id="admin-products"></tbody></table></section></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { renderAdminProducts } from '../js/admin/products.js'; requireAdmin(() => renderAdminProducts());</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field"><label for="email">Email</label><input type="email" id="email" name="email" required autocomplete="username"></div>
+        <div class="form-field"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="products.html" aria-current="page">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html">Orders</a>
+        <a href="customers.html">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head">
+        <h1>Products</h1>
+        <a class="button-primary" href="product-form.html">New Product</a>
+      </div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr><th></th><th>Name</th><th>Brand</th><th>Price</th><th>Gender</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody data-products-table></tbody>
+        </table>
+        <p class="admin-empty" data-products-empty hidden>No products yet — create your first one.</p>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin } from '../js/admin/auth.js';
+    import { initProductsListPage } from '../js/admin/products.js';
+
+    requireAdmin(() => {
+      initProductsListPage();
+    });
+  </script>
+</body>
+</html>

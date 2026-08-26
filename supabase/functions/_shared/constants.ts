@@ -68,7 +68,7 @@ export const ADMIN_SETTABLE_ORDER_STATUSES: string[] = [
 ];
 
 export const ORDER_TYPE = {
-  STANDARD: 'standard',
+  STANDARD: 'normal',
   PREORDER: 'preorder',
 } as const;
 

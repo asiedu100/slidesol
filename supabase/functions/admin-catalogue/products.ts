@@ -5,14 +5,17 @@ import {
   isBoolean, isFiniteNonNegativeNumber, isNonEmptyString, isOptionalString, parseJsonBody, UUID_RE,
 } from './validation.ts';
 
+const GENDERS = ['men', 'women', 'unisex'];
+const isGender = (value: unknown): value is string => typeof value === 'string' && GENDERS.includes(value);
+
 const PRODUCT_LIST_SELECT = `
-  id, name, slug, price, is_active, created_at,
+  id, name, slug, price, gender, is_active, created_at,
   brands ( id, name ),
   product_images ( image_url, sort_order )
 `;
 
 const PRODUCT_DETAIL_SELECT = `
-  id, brand_id, name, slug, description, price, is_active, created_at, updated_at,
+  id, brand_id, name, slug, description, price, gender, is_active, created_at, updated_at,
   brands ( id, name, slug, is_active )
 `;
 
@@ -34,7 +37,7 @@ export const list = async (supabase: SupabaseClient): Promise<Response> => {
 export const getOne = async (supabase: SupabaseClient, id: string): Promise<Response> => {
   const [productRes, coloursRes, variantsRes, imagesRes] = await Promise.all([
     supabase.from('products').select(PRODUCT_DETAIL_SELECT).eq('id', id).maybeSingle(),
-    supabase.from('product_colours').select('id, product_id, name, hex_code, created_at').eq('product_id', id).order('name', { ascending: true }),
+    supabase.from('product_colours').select('id, product_id, name, hex_code, is_active, created_at').eq('product_id', id).order('name', { ascending: true }),
     supabase.from('product_variants').select('id, product_id, colour_id, size, stock_quantity, is_preorder_available, preorder_delivery_days, sku, is_active, created_at, updated_at').eq('product_id', id).order('size', { ascending: true }),
     supabase.from('product_images').select('id, product_id, colour_id, image_url, alt_text, sort_order, created_at').eq('product_id', id).order('sort_order', { ascending: true }),
   ]);
@@ -84,6 +87,9 @@ export const create = async (supabase: SupabaseClient, req: Request): Promise<Re
   if (body.is_active !== undefined && !isBoolean(body.is_active)) {
     return errorResponse(400, 'validation_error', 'is_active must be true or false.');
   }
+  if (body.gender !== undefined && !isGender(body.gender)) {
+    return errorResponse(400, 'validation_error', 'gender must be one of men, women, unisex.');
+  }
 
   try {
     if (!(await brandExists(supabase, body.brand_id))) {
@@ -110,6 +116,7 @@ export const create = async (supabase: SupabaseClient, req: Request): Promise<Re
       slug,
       description: isNonEmptyString(body.description) ? (body.description as string).trim() : null,
       price: body.price,
+      gender: body.gender ?? 'unisex',
       is_active: body.is_active ?? true,
     })
     .select(PRODUCT_DETAIL_SELECT)
@@ -173,6 +180,11 @@ export const update = async (supabase: SupabaseClient, req: Request, id: string)
   if (body.is_active !== undefined) {
     if (!isBoolean(body.is_active)) return errorResponse(400, 'validation_error', 'is_active must be true or false.');
     patch.is_active = body.is_active;
+  }
+
+  if (body.gender !== undefined) {
+    if (!isGender(body.gender)) return errorResponse(400, 'validation_error', 'gender must be one of men, women, unisex.');
+    patch.gender = body.gender;
   }
 
   if (Object.keys(patch).length === 0) {

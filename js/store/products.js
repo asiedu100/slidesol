@@ -1,562 +1,757 @@
+import { supabase } from '../supabase.js';
 import { formatMoney } from '../config.js';
-import { requireSupabase } from '../supabase.js';
 import { addToCart } from './cart.js';
+import { placeholderPhotoFor } from './placeholder-photos.js';
 
-export const products = [];
+const CATEGORY_THEMES = [
+  { label: 'Slides', description: 'The everyday slide, done properly.', preferredBrandName: null, image: 's5.jpeg' },
+  { label: 'Recovery', description: 'Engineered for the after.', preferredBrandName: 'OOFOS', image: 's42.jpeg' },
+  { label: 'Everyday', description: 'Built for wherever the day takes you.', preferredBrandName: null, image: 's52.jpeg' },
+  { label: 'Premium', description: 'Considered materials, considered fit.', preferredBrandName: 'Christian Louboutin', image: 's55.jpeg' },
+];
 
-const PRODUCT_SELECT = `
-  id,
-  brand_id,
-  name,
-  slug,
-  description,
-  price,
-  is_active,
-  brands (
-    id,
-    name,
-    slug,
-    logo_url
-  ),
-  product_colours (
-    id,
-    product_id,
-    name,
-    hex_code
-  ),
-  product_variants (
-    id,
-    product_id,
-    colour_id,
-    size,
-    stock_quantity,
-    is_preorder_available,
-    preorder_delivery_days,
-    sku,
-    is_active
-  ),
-  product_images (
-    id,
-    product_id,
-    colour_id,
-    image_url,
-    alt_text,
-    sort_order
-  )
-`;
+const bestImage = (images) => (
+  [...(images || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0]?.image_url ?? null
+);
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const escapeHtml = (value = '') => String(value)
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;')
-  .replaceAll("'", '&#039;');
-
-const bySortOrder = (a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0);
-
-const getProductUrl = (product) => `product.html?slug=${encodeURIComponent(product.slug || product.id)}`;
-
-const getImages = (product, colourId = null) => {
-  const images = [...(product.product_images || [])].sort(bySortOrder);
-  const colourImages = colourId ? images.filter((image) => image.colour_id === colourId) : [];
-  return colourImages.length ? colourImages : images;
-};
-
-const getPrimaryImage = (product, colourId = null) => {
-  const image = getImages(product, colourId)[0];
-  return {
-    url: image?.image_url || '',
-    alt: image?.alt_text || `${product.brands?.name || 'SLIDESOL'} ${product.name}`,
-  };
-};
-
-const getSecondaryImage = (product, colourId = null) => {
-  const image = getImages(product, colourId)[1];
-  if (!image) return null;
-  return {
-    url: image.image_url,
-    alt: image.alt_text || `${product.brands?.name || 'SLIDESOL'} ${product.name}, alternate view`,
-  };
-};
-
-const getActiveVariants = (product) => (product.product_variants || [])
-  .filter((variant) => variant.is_active)
-  .sort((a, b) => Number(a.size) - Number(b.size));
-
-const getAvailableVariants = (product) => getActiveVariants(product)
-  .filter((variant) => Number(variant.stock_quantity || 0) > 0 || variant.is_preorder_available);
-
-const getAvailableColours = (product) => {
-  const availableColourIds = new Set(getAvailableVariants(product).map((variant) => variant.colour_id));
-  return (product.product_colours || [])
-    .filter((colour) => availableColourIds.has(colour.id))
-    .sort((a, b) => a.name.localeCompare(b.name));
-};
-
-const getBrandOptions = (products) => {
-  const brands = new Map();
-
-  products.forEach((product) => {
-    if (product.brands?.slug && product.brands?.name) {
-      brands.set(product.brands.slug, product.brands.name);
-    }
-  });
-
-  return [...brands.entries()]
-    .map(([slug, name]) => ({ slug, name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-};
-
-const VALID_SORTS = new Set(['newest', 'price-asc', 'price-desc']);
-
-const sortProducts = (list, order) => {
-  if (order === 'price-asc') return [...list].sort((a, b) => Number(a.price) - Number(b.price));
-  if (order === 'price-desc') return [...list].sort((a, b) => Number(b.price) - Number(a.price));
-  return list;
-};
-
-const syncUrlParam = (key, value, defaultValue) => {
-  const nextUrl = new URL(window.location.href);
-  if (!value || value === defaultValue) nextUrl.searchParams.delete(key);
-  else nextUrl.searchParams.set(key, value);
-  window.history.replaceState({}, '', nextUrl);
+// Given images already sorted by sort_order, pick a second, genuinely different image for the
+// hover-swap layer — preferring a side/back/top angle over whatever the primary (index 0) is.
+const altImageFor = (sortedImages) => {
+  if (sortedImages.length < 2) return null;
+  const [, ...rest] = sortedImages;
+  const byAngle = (angle) => rest.find((image) => image.shot_angle === angle);
+  return byAngle('side') || byAngle('back') || byAngle('top') || rest[0] || null;
 };
 
 export const fetchActiveProducts = async () => {
-  const client = requireSupabase();
-  const { data, error } = await client
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
     .from('products')
-    .select(PRODUCT_SELECT)
+    .select('id, name, slug, price, gender, created_at, brands(name, slug), product_images(image_url, sort_order, shot_angle)')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data || [];
+  if (error) {
+    console.error('Failed to load products', error);
+    return [];
+  }
+
+  return (data || []).map((product) => {
+    const sortedImages = [...(product.product_images || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      gender: product.gender ?? 'unisex',
+      brand: product.brands?.name ?? '',
+      brandSlug: product.brands?.slug ?? '',
+      image: sortedImages[0]?.image_url ?? null,
+      altImage: altImageFor(sortedImages)?.image_url ?? null,
+    };
+  });
 };
 
-export const fetchActiveProduct = async (identifier) => {
-  const client = requireSupabase();
+export const fetchProductBySlug = async (slug) => {
+  if (!supabase) return null;
 
-  const bySlug = await client
+  const { data, error } = await supabase
     .from('products')
-    .select(PRODUCT_SELECT)
+    .select(`
+      id, name, slug, description, price, gender,
+      brands(name, slug),
+      product_colours(id, name, hex_code, is_active),
+      product_variants(id, colour_id, size, stock_quantity, is_preorder_available, preorder_delivery_days, is_active),
+      product_images(id, colour_id, image_url, alt_text, sort_order, shot_angle)
+    `)
+    .eq('slug', slug)
     .eq('is_active', true)
-    .eq('slug', identifier)
     .maybeSingle();
 
-  if (bySlug.error) throw bySlug.error;
-  if (bySlug.data) return bySlug.data;
+  if (error) {
+    console.error('Failed to load product', error);
+    return null;
+  }
 
-  if (!uuidPattern.test(identifier)) return null;
+  return data;
+};
 
-  const byId = await client
-    .from('products')
-    .select(PRODUCT_SELECT)
+export const fetchActiveBrands = async () => {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('brands')
+    .select('id, name, slug, products(is_active, product_images(image_url, sort_order))')
     .eq('is_active', true)
-    .eq('id', identifier)
-    .maybeSingle();
+    .order('name');
 
-  if (byId.error) throw byId.error;
-  return byId.data;
+  if (error) {
+    console.error('Failed to load brands', error);
+    return [];
+  }
+
+  return (data || []).map((brand) => {
+    const images = (brand.products || [])
+      .filter((product) => product.is_active)
+      .flatMap((product) => product.product_images || []);
+
+    return {
+      id: brand.id,
+      name: brand.name,
+      slug: brand.slug,
+      image: bestImage(images),
+    };
+  });
 };
 
-const renderState = (element, type, message, action = '') => {
-  element.innerHTML = `
-    <div class="catalogue-state catalogue-state-${type}">
-      <p>${escapeHtml(message)}</p>
-      ${action}
-    </div>
-  `;
+const createProductCard = (product) => {
+  const card = document.createElement('a');
+  const isPlaceholder = !product.image;
+  card.className = `media-card media-card--photo${isPlaceholder ? ' media-card--placeholder' : ''}`;
+  card.href = `product.html?slug=${encodeURIComponent(product.slug)}`;
+
+  const mediaWrap = document.createElement('div');
+  mediaWrap.className = 'media-card__media';
+  card.appendChild(mediaWrap);
+
+  const media = document.createElement('div');
+  media.className = 'media-card__image';
+  media.style.backgroundImage = `url("${product.image || placeholderPhotoFor(product.id)}")`;
+  mediaWrap.appendChild(media);
+
+  if (product.altImage) {
+    const altMedia = document.createElement('div');
+    altMedia.className = 'media-card__image media-card__image--alt';
+    altMedia.style.backgroundImage = `url("${product.altImage}")`;
+    mediaWrap.appendChild(altMedia);
+  }
+
+  const cta = document.createElement('span');
+  cta.className = 'media-card__cta';
+  cta.textContent = 'Shop Now';
+  mediaWrap.appendChild(cta);
+
+  const meta = document.createElement('div');
+  meta.className = 'media-card__meta';
+
+  const metaBrand = document.createElement('p');
+  metaBrand.className = 'media-card__brand';
+  metaBrand.textContent = product.brand;
+
+  const metaName = document.createElement('p');
+  metaName.className = 'media-card__name';
+  metaName.textContent = product.name;
+
+  const metaPrice = document.createElement('p');
+  metaPrice.className = 'media-card__price';
+  metaPrice.textContent = formatMoney(product.price);
+
+  meta.append(metaBrand, metaName, metaPrice);
+  card.appendChild(meta);
+
+  return card;
 };
 
-const renderSkeletonGrid = (element, count = 3) => {
-  element.innerHTML = Array.from({ length: count })
-    .map(() => '<div class="product-card skeleton-card"></div>')
-    .join('');
+const createBrandCard = (brand) => {
+  const card = document.createElement('a');
+  const isPlaceholder = !brand.image;
+  card.className = `media-card media-card--brand media-card--photo${isPlaceholder ? ' media-card--placeholder' : ''}`;
+  card.href = `shop.html?brand=${encodeURIComponent(brand.slug)}`;
+
+  const mediaWrap = document.createElement('div');
+  mediaWrap.className = 'media-card__media';
+  card.appendChild(mediaWrap);
+
+  const media = document.createElement('div');
+  media.className = 'media-card__image';
+  media.style.backgroundImage = `url("${brand.image || placeholderPhotoFor(brand.slug)}")`;
+  mediaWrap.appendChild(media);
+
+  const hoverCta = document.createElement('span');
+  hoverCta.className = 'media-card__cta';
+  hoverCta.textContent = 'Shop Now';
+  mediaWrap.appendChild(hoverCta);
+
+  const meta = document.createElement('div');
+  meta.className = 'media-card__meta';
+
+  const name = document.createElement('p');
+  name.className = 'media-card__brand-name';
+  name.textContent = brand.name;
+
+  const cta = document.createElement('p');
+  cta.className = 'media-card__brand-cta';
+  cta.textContent = `Shop ${brand.name}`;
+
+  meta.append(name, cta);
+  card.appendChild(meta);
+
+  return card;
 };
 
-const renderBrandFilters = (products, activeBrand) => {
-  const filters = document.querySelector('[data-brand-filters]');
-  if (!filters) return;
+const createCategoryPanel = (theme, product) => {
+  const panel = document.createElement('article');
+  panel.className = `category-panel category-panel--photo${product?.image ? '' : ' category-panel--placeholder'}`;
 
-  const brands = getBrandOptions(products);
-  filters.innerHTML = `
-    <button class="filter ${activeBrand === 'all' ? 'active' : ''}" data-brand-filter="all">All</button>
-    ${brands.map((brand) => `
-      <button class="filter ${activeBrand === brand.slug ? 'active' : ''}" data-brand-filter="${escapeHtml(brand.slug)}">
-        ${escapeHtml(brand.name)}
-      </button>
-    `).join('')}
-  `;
+  const media = document.createElement('div');
+  media.className = 'category-panel__media';
+  media.style.backgroundImage = `url("${theme.image || product?.image || placeholderPhotoFor(theme.label)}")`;
+  panel.appendChild(media);
+
+  const copy = document.createElement('div');
+  copy.className = 'category-panel__copy';
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'Shop the feeling';
+
+  const heading = document.createElement('h3');
+  heading.textContent = theme.label;
+
+  const desc = document.createElement('p');
+  desc.className = 'category-panel__desc';
+  desc.textContent = theme.description;
+
+  const link = document.createElement('a');
+  link.className = 'link-underline';
+  link.href = product?.brandSlug ? `shop.html?brand=${encodeURIComponent(product.brandSlug)}` : 'shop.html';
+  link.textContent = 'Explore';
+
+  copy.append(eyebrow, heading, desc, link);
+  panel.appendChild(copy);
+
+  return panel;
 };
 
-const renderCardImages = (product) => {
-  const image = getPrimaryImage(product);
-  const secondaryImage = getSecondaryImage(product);
+const renderFeaturedCollection = (products) => {
+  const rail = document.querySelector('[data-featured-rail]');
+  const emptyState = document.querySelector('[data-featured-empty]');
+  if (!rail) return;
 
-  if (!image.url) return '<span>No image yet</span>';
+  if (products.length === 0) {
+    rail.hidden = true;
+    if (emptyState) emptyState.hidden = false;
+    return;
+  }
 
-  const secondaryMarkup = secondaryImage
-    ? `<img class="product-img-secondary" src="${escapeHtml(secondaryImage.url)}" alt="${escapeHtml(secondaryImage.alt)}" loading="lazy">`
-    : '';
-
-  return `
-    <img class="product-img-primary" src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt)}" loading="lazy">
-    ${secondaryMarkup}
-  `;
+  products.forEach((product) => rail.appendChild(createProductCard(product)));
 };
 
-const renderProductCard = (product, index = 0) => {
-  const brandName = product.brands?.name || 'SLIDESOL';
-  const availableVariants = getAvailableVariants(product);
-  const availableColours = getAvailableColours(product);
-  const hasStock = availableVariants.some((variant) => Number(variant.stock_quantity || 0) > 0);
-  const hasPreorder = availableVariants.some((variant) => variant.is_preorder_available);
+const FEATURED_PRODUCTS_INITIAL_COUNT = 4;
 
-  return `
-    <article class="product-card" style="animation-delay:${Math.min(index, 8) * 70}ms">
-      <a href="${getProductUrl(product)}" class="product-image" aria-label="View ${escapeHtml(product.name)}">
-        ${renderCardImages(product)}
-      </a>
-      <div class="product-meta">
-        <div>
-          <p class="category">${escapeHtml(brandName)}</p>
-          <h2><a href="${getProductUrl(product)}">${escapeHtml(product.name)}</a></h2>
-          <p class="product-options">${availableColours.length} colour${availableColours.length === 1 ? '' : 's'} / sizes 38-45</p>
-        </div>
-        <strong>${formatMoney(product.price)}</strong>
-      </div>
-      <div class="product-card-footer">
-        <span>${hasStock ? 'In stock' : hasPreorder ? 'Pre-order' : 'Unavailable'}</span>
-        <a href="${getProductUrl(product)}">Choose size</a>
-      </div>
-    </article>
-  `;
-};
+const renderFeaturedProducts = (products) => {
+  const section = document.querySelector('[data-featured-products-section]');
+  const grid = document.querySelector('[data-products-grid]');
+  const showMoreButton = document.querySelector('[data-products-show-more]');
+  if (!section || !grid) return;
 
-const renderHomeProductCard = (product, index = 0) => {
-  const brandName = product.brands?.name || 'SLIDESOL';
+  if (products.length === 0) {
+    section.hidden = true;
+    return;
+  }
 
-  return `
-    <article class="product-card" style="animation-delay:${Math.min(index, 8) * 70}ms">
-      <a class="product-image" href="${getProductUrl(product)}" aria-label="View ${escapeHtml(product.name)}">
-        ${renderCardImages(product)}
-      </a>
-      <div class="product-info">
-        <p>${escapeHtml(brandName)}</p>
-        <h3>${escapeHtml(product.name)}</h3>
-        <span>${formatMoney(product.price)}</span>
-      </div>
-      <a class="product-button" href="${getProductUrl(product)}">View Product</a>
-    </article>
-  `;
-};
+  section.hidden = false;
+  products.forEach((product, index) => {
+    const card = createProductCard(product);
+    if (index >= FEATURED_PRODUCTS_INITIAL_COUNT) card.classList.add('is-hidden', 'pre-reveal');
+    grid.appendChild(card);
+  });
 
-const initHomePage = async () => {
-  const grid = document.querySelector('#featured-product-grid');
-  if (!grid) return;
-
-  renderSkeletonGrid(grid, 3);
-
-  try {
-    const allProducts = await fetchActiveProducts();
-    const featured = allProducts.slice(0, 3);
-
-    if (!featured.length) {
-      renderState(grid, 'empty', 'New arrivals are on the way. Check back soon.');
-      return;
+  if (showMoreButton) {
+    const hasMore = products.length > FEATURED_PRODUCTS_INITIAL_COUNT;
+    showMoreButton.hidden = !hasMore;
+    if (hasMore) {
+      showMoreButton.addEventListener('click', () => {
+        const hiddenCards = grid.querySelectorAll('.media-card.is-hidden');
+        hiddenCards.forEach((card) => card.classList.remove('is-hidden'));
+        // Force a reflow so the browser paints the pre-reveal (faded/offset) state before the
+        // next line removes it — otherwise there's no frame for the transition to animate from.
+        void grid.offsetHeight;
+        hiddenCards.forEach((card) => card.classList.remove('pre-reveal'));
+        showMoreButton.hidden = true;
+      }, { once: true });
     }
-
-    grid.innerHTML = featured.map((product, index) => renderHomeProductCard(product, index)).join('');
-  } catch (error) {
-    renderState(
-      grid,
-      'error',
-      error.message || 'We could not load the collection.',
-      '<a class="text-link" href="shop.html">Browse the shop</a>',
-    );
   }
 };
 
-const initShopPage = async () => {
-  const grid = document.querySelector('#product-grid');
-  const count = document.querySelector('#product-count');
+const renderCategoryStorytelling = (products) => {
+  const container = document.querySelector('[data-category-panels]');
+  if (!container) return;
+
+  const used = new Set();
+
+  CATEGORY_THEMES.forEach((theme) => {
+    let match = null;
+
+    if (theme.preferredBrandName) {
+      match = products.find((product) => product.brand === theme.preferredBrandName && product.image && !used.has(product.id));
+    }
+    if (!match) {
+      match = products.find((product) => product.image && !used.has(product.id));
+    }
+    if (match) used.add(match.id);
+
+    container.appendChild(createCategoryPanel(theme, match));
+  });
+};
+
+const renderBrandShowcase = (brands) => {
+  const grid = document.querySelector('[data-brand-grid]');
   if (!grid) return;
 
-  const searchInput = document.querySelector('#product-search');
-  const sortSelect = document.querySelector('#product-sort');
+  brands.forEach((brand) => grid.appendChild(createBrandCard(brand)));
+};
 
+export const initHomepageCatalogue = async () => {
+  const [products, brands] = await Promise.all([fetchActiveProducts(), fetchActiveBrands()]);
+
+  renderFeaturedCollection(products.slice(0, 6));
+  renderFeaturedProducts(products.slice(6));
+  renderCategoryStorytelling(products);
+  renderBrandShowcase(brands);
+};
+
+const SHOP_SORTERS = {
+  newest: null, // products already arrive newest-first from fetchActiveProducts()
+  'price-asc': (a, b) => a.price - b.price,
+  'price-desc': (a, b) => b.price - a.price,
+  'name-asc': (a, b) => a.name.localeCompare(b.name),
+};
+
+const GENDERS = [
+  { value: 'men', label: 'Men' },
+  { value: 'women', label: 'Women' },
+  { value: 'unisex', label: 'Unisex' },
+];
+
+const readShopStateFromUrl = () => {
   const params = new URLSearchParams(window.location.search);
-  let activeBrand = params.get('brand') || 'all';
-  let searchTerm = params.get('q') || '';
-  let sortOrder = VALID_SORTS.has(params.get('sort')) ? params.get('sort') : 'newest';
+  return {
+    brand: params.get('brand') || '',
+    gender: GENDERS.some((g) => g.value === params.get('gender')) ? params.get('gender') : '',
+    q: params.get('q') || '',
+    sort: SHOP_SORTERS[params.get('sort')] ? params.get('sort') : 'newest',
+  };
+};
 
-  if (searchInput) searchInput.value = searchTerm;
-  if (sortSelect) sortSelect.value = sortOrder;
+const writeShopStateToUrl = (state) => {
+  const params = new URLSearchParams();
+  if (state.brand) params.set('brand', state.brand);
+  if (state.gender) params.set('gender', state.gender);
+  if (state.q) params.set('q', state.q);
+  if (state.sort !== 'newest') params.set('sort', state.sort);
 
-  renderSkeletonGrid(grid, 6);
+  const query = params.toString();
+  const url = `${window.location.pathname}${query ? `?${query}` : ''}`;
+  window.history.replaceState({}, '', url);
+};
 
-  try {
-    const products = await fetchActiveProducts();
-    const render = () => {
-      renderBrandFilters(products, activeBrand);
+const renderShopGrid = (products) => {
+  const grid = document.querySelector('[data-shop-grid]');
+  const empty = document.querySelector('[data-shop-empty]');
+  if (!grid) return;
 
-      let visibleProducts = products.filter((product) => (
-        activeBrand === 'all' || product.brands?.slug === activeBrand
+  grid.innerHTML = '';
+
+  if (products.length === 0) {
+    grid.hidden = true;
+    if (empty) empty.hidden = false;
+    return;
+  }
+
+  grid.hidden = false;
+  if (empty) empty.hidden = true;
+  products.forEach((product) => grid.appendChild(createProductCard(product)));
+};
+
+export const initShopPage = async () => {
+  const statusEl = document.querySelector('[data-shop-status]');
+  const brandContainer = document.querySelector('[data-brand-filters]');
+  const genderContainer = document.querySelector('[data-gender-filters]');
+  const searchInput = document.querySelector('[data-search-input]');
+  const sortSelect = document.querySelector('[data-sort-select]');
+  const filterPanel = document.querySelector('[data-filter-panel]');
+
+  const state = readShopStateFromUrl();
+
+  const [products, brands] = await Promise.all([fetchActiveProducts(), fetchActiveBrands()]);
+  if (statusEl) statusEl.hidden = true;
+
+  if (brandContainer) {
+    const allPill = document.createElement('button');
+    allPill.type = 'button';
+    allPill.className = 'brand-pill';
+    allPill.dataset.brand = '';
+    allPill.textContent = 'All';
+    brandContainer.appendChild(allPill);
+
+    brands.forEach((brand) => {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'brand-pill';
+      pill.dataset.brand = brand.slug;
+      pill.textContent = brand.name;
+      brandContainer.appendChild(pill);
+    });
+  }
+
+  if (genderContainer) {
+    const allPill = document.createElement('button');
+    allPill.type = 'button';
+    allPill.className = 'brand-pill';
+    allPill.dataset.gender = '';
+    allPill.textContent = 'All';
+    genderContainer.appendChild(allPill);
+
+    GENDERS.forEach((gender) => {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'brand-pill';
+      pill.dataset.gender = gender.value;
+      pill.textContent = gender.label;
+      genderContainer.appendChild(pill);
+    });
+  }
+
+  const syncActivePill = () => {
+    brandContainer?.querySelectorAll('.brand-pill').forEach((pill) => {
+      pill.classList.toggle('is-active', pill.dataset.brand === state.brand);
+    });
+    genderContainer?.querySelectorAll('.brand-pill').forEach((pill) => {
+      pill.classList.toggle('is-active', pill.dataset.gender === state.gender);
+    });
+  };
+
+  const render = () => {
+    let list = state.brand ? products.filter((product) => product.brandSlug === state.brand) : products;
+    if (state.gender) list = list.filter((product) => product.gender === state.gender);
+
+    if (state.q) {
+      const q = state.q.toLowerCase();
+      list = list.filter((product) => (
+        product.name.toLowerCase().includes(q) || product.brand.toLowerCase().includes(q)
       ));
+    }
 
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        visibleProducts = visibleProducts.filter((product) => (
-          product.name.toLowerCase().includes(term)
-          || (product.brands?.name || '').toLowerCase().includes(term)
-        ));
-      }
+    const sorter = SHOP_SORTERS[state.sort];
+    if (sorter) list = [...list].sort(sorter);
 
-      visibleProducts = sortProducts(visibleProducts, sortOrder);
+    renderShopGrid(list);
+    writeShopStateToUrl(state);
+  };
 
-      if (count) {
-        count.textContent = `${visibleProducts.length} product${visibleProducts.length === 1 ? '' : 's'}`;
-      }
+  brandContainer?.addEventListener('click', (event) => {
+    const pill = event.target.closest('[data-brand]');
+    if (!pill) return;
 
-      if (!visibleProducts.length) {
-        const message = searchTerm
-          ? `No products match "${searchTerm}".`
-          : 'No active products found for this brand yet.';
-        renderState(grid, 'empty', message);
-        return;
-      }
-
-      grid.innerHTML = visibleProducts.map((product, index) => renderProductCard(product, index)).join('');
-    };
-
+    state.brand = pill.dataset.brand;
+    syncActivePill();
     render();
+    filterPanel?.classList.remove('is-open');
+  });
 
-    document.querySelector('[data-brand-filters]')?.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-brand-filter]');
-      if (!button) return;
+  genderContainer?.addEventListener('click', (event) => {
+    const pill = event.target.closest('[data-gender]');
+    if (!pill) return;
 
-      activeBrand = button.dataset.brandFilter;
-      syncUrlParam('brand', activeBrand, 'all');
-      render();
+    state.gender = pill.dataset.gender;
+    syncActivePill();
+    render();
+    filterPanel?.classList.remove('is-open');
+  });
+
+  if (searchInput) {
+    searchInput.value = state.q;
+    let debounce;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        state.q = searchInput.value.trim();
+        render();
+      }, 200);
     });
-
-    searchInput?.addEventListener('input', (event) => {
-      searchTerm = event.target.value.trim();
-      syncUrlParam('q', searchTerm, '');
-      render();
-    });
-
-    sortSelect?.addEventListener('change', (event) => {
-      sortOrder = event.target.value;
-      syncUrlParam('sort', sortOrder, 'newest');
-      render();
-    });
-  } catch (error) {
-    renderState(
-      grid,
-      'error',
-      error.message || 'We could not load the product catalogue.',
-      '<a class="text-link" href="shop.html">Try again</a>',
-    );
   }
+
+  if (sortSelect) {
+    sortSelect.value = state.sort;
+    sortSelect.addEventListener('change', () => {
+      state.sort = sortSelect.value;
+      render();
+    });
+  }
+
+  syncActivePill();
+  render();
 };
 
-const renderGallery = (product, activeColourId) => {
-  const gallery = document.querySelector('[data-product-gallery]');
-  if (!gallery) return;
+const renderRelatedProducts = async (currentProductId) => {
+  const section = document.querySelector('[data-related-section]');
+  const container = document.querySelector('[data-related-products]');
+  if (!section || !container) return;
 
-  const images = getImages(product, activeColourId);
+  const products = await fetchActiveProducts();
+  const related = products.filter((product) => product.id !== currentProductId).slice(0, 4);
 
-  if (!images.length) {
-    gallery.innerHTML = '<div class="detail-image detail-image-empty">No product images yet</div>';
+  if (related.length === 0) {
+    section.hidden = true;
     return;
   }
 
-  gallery.innerHTML = images.map((image) => `
-    <figure class="detail-image">
-      <img src="${escapeHtml(image.image_url)}" alt="${escapeHtml(image.alt_text || product.name)}">
-    </figure>
-  `).join('');
+  section.hidden = false;
+  related.forEach((product) => container.appendChild(createProductCard(product)));
 };
 
-const renderColourButtons = (product, activeColourId) => getAvailableColours(product).map((colour) => `
-  <button
-    class="swatch ${colour.id === activeColourId ? 'active' : ''}"
-    type="button"
-    data-colour-id="${escapeHtml(colour.id)}"
-    aria-label="Select ${escapeHtml(colour.name)}"
-  >
-    <span style="background:${escapeHtml(colour.hex_code || '#d8d2c4')}"></span>
-    ${escapeHtml(colour.name)}
-  </button>
-`).join('');
+export const initProductPage = async () => {
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  const loadingEl = document.querySelector('[data-product-loading]');
+  const notFoundEl = document.querySelector('[data-product-not-found]');
+  const pageEl = document.querySelector('[data-product-page]');
 
-const renderSizeButtons = (product, activeColourId, activeVariantId) => {
-  const variants = getActiveVariants(product).filter((variant) => variant.colour_id === activeColourId);
+  const product = slug ? await fetchProductBySlug(slug) : null;
+  if (loadingEl) loadingEl.hidden = true;
 
-  return variants.map((variant) => {
-    const stockQuantity = Number(variant.stock_quantity || 0);
-    const isPreorder = variant.is_preorder_available && stockQuantity <= 0;
-    const available = stockQuantity > 0 || variant.is_preorder_available;
-    const label = isPreorder ? `${variant.size} Pre-order` : variant.size;
-    const ariaLabel = !available
-      ? `Size ${variant.size}, out of stock`
-      : isPreorder
-        ? `Size ${variant.size}, pre-order`
-        : `Size ${variant.size}`;
-
-    return `
-      <button
-        class="size-option ${variant.id === activeVariantId ? 'active' : ''}"
-        type="button"
-        data-variant-id="${escapeHtml(variant.id)}"
-        aria-label="${escapeHtml(ariaLabel)}"
-        ${available ? '' : 'disabled'}
-      >
-        ${escapeHtml(label)}
-      </button>
-    `;
-  }).join('');
-};
-
-const getVariantNote = (variant) => {
-  if (!variant) return 'Select a colour and size.';
-  if (Number(variant.stock_quantity || 0) > 0) return `${variant.stock_quantity} available now.`;
-  if (variant.is_preorder_available) return `Pre-order ships in ${variant.preorder_delivery_days || 'a few'} days.`;
-  return 'This size is currently unavailable.';
-};
-
-const initProductPage = async () => {
-  const detail = document.querySelector('#product-detail');
-  if (!detail) return;
-
-  const params = new URLSearchParams(window.location.search);
-  const identifier = params.get('slug') || params.get('id');
-
-  if (!identifier) {
-    renderState(detail, 'error', 'No product was selected.', '<a class="text-link" href="shop.html">Back to shop</a>');
+  if (!product) {
+    if (notFoundEl) notFoundEl.hidden = false;
     return;
   }
 
-  renderState(detail, 'loading', 'Loading product details...');
+  if (pageEl) pageEl.hidden = false;
+  document.title = `${product.name} — SLIDESOL`;
 
-  try {
-    const product = await fetchActiveProduct(identifier);
+  const colours = product.product_colours || [];
+  const variants = (product.product_variants || []).filter((variant) => variant.is_active);
+  const images = product.product_images || [];
 
-    if (!product) {
-      renderState(detail, 'empty', 'This product is not available.', '<a class="text-link" href="shop.html">Back to shop</a>');
+  const isColourActive = (colourId) => colours.find((colour) => colour.id === colourId)?.is_active !== false;
+  const isColourAvailable = (colourId) => isColourActive(colourId) && variants.some((variant) => (
+    variant.colour_id === colourId && (variant.stock_quantity > 0 || variant.is_preorder_available)
+  ));
+  const displayColours = colours;
+
+  const state = {
+    colourId: displayColours.find((colour) => isColourAvailable(colour.id))?.id ?? displayColours[0]?.id ?? null,
+    size: null,
+    quantity: 1,
+  };
+  let activeImages = [];
+
+  const brandEl = document.querySelector('[data-product-brand]');
+  const nameEl = document.querySelector('[data-product-name]');
+  const priceEl = document.querySelector('[data-product-price]');
+  const descriptionEl = document.querySelector('[data-product-description]');
+  const swatchContainer = document.querySelector('[data-colour-swatches]');
+  const sizeContainer = document.querySelector('[data-size-options]');
+  const galleryMain = document.querySelector('[data-gallery-main]');
+  const galleryThumbs = document.querySelector('[data-gallery-thumbs]');
+  const addButton = document.querySelector('[data-add-to-cart]');
+  const stockNote = document.querySelector('[data-stock-note]');
+  const qtyValue = document.querySelector('[data-qty-value]');
+
+  if (brandEl) brandEl.textContent = product.brands?.name ?? '';
+  if (nameEl) nameEl.textContent = product.name;
+  if (priceEl) priceEl.textContent = formatMoney(product.price);
+  if (descriptionEl) descriptionEl.textContent = product.description ?? '';
+
+  const imagesForColour = (colourId) => {
+    const tagged = images.filter((image) => image.colour_id === colourId);
+    const pool = tagged.length > 0 ? tagged : images;
+    return [...pool].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  };
+
+  const currentVariant = () => variants.find((variant) => variant.colour_id === state.colourId && variant.size === state.size);
+
+  const renderGallery = () => {
+    activeImages = imagesForColour(state.colourId);
+    if (galleryMain) galleryMain.innerHTML = '';
+    if (galleryThumbs) galleryThumbs.innerHTML = '';
+
+    if (activeImages.length === 0) {
+      // TEMPORARY placeholder photo (see plan §16/§17) — a single deterministic
+      // image, not a fabricated multi-angle gallery, since this is one specific
+      // real product and a fake "gallery" of unrelated shoes would be confusing.
+      if (galleryMain) {
+        const slide = document.createElement('div');
+        slide.className = 'pdp-gallery__slide pdp-gallery__slide--placeholder';
+        slide.style.backgroundImage = `url("${placeholderPhotoFor(product.id)}")`;
+        galleryMain.appendChild(slide);
+      }
       return;
     }
 
-    const colours = getAvailableColours(product);
-    let activeColourId = colours[0]?.id || null;
-    let activeVariant = getAvailableVariants(product).find((variant) => variant.colour_id === activeColourId) || null;
+    activeImages.forEach((image, index) => {
+      const slide = document.createElement('div');
+      slide.className = 'pdp-gallery__slide';
+      slide.style.backgroundImage = `url("${image.image_url}")`;
+      galleryMain?.appendChild(slide);
 
-    const render = () => {
-      const brandName = product.brands?.name || 'SLIDESOL';
-      const stockQuantity = Number(activeVariant?.stock_quantity || 0);
-      const effectiveMax = !activeVariant
-        ? 1
-        : stockQuantity > 0 ? stockQuantity : (activeVariant.is_preorder_available ? 20 : 1);
+      const thumb = document.createElement('button');
+      thumb.type = 'button';
+      thumb.className = `pdp-gallery__thumb ${index === 0 ? 'is-active' : ''}`;
+      thumb.style.backgroundImage = `url("${image.image_url}")`;
+      thumb.dataset.index = String(index);
+      galleryThumbs?.appendChild(thumb);
+    });
+  };
 
-      detail.innerHTML = `
-        <div class="product-gallery" data-product-gallery></div>
-        <section class="detail-copy">
-          <a class="back-link" href="shop.html">Back to shop</a>
-          <p class="eyebrow">${escapeHtml(brandName)}</p>
-          <h1>${escapeHtml(product.name)}</h1>
-          <p class="price">${formatMoney(product.price)}</p>
-          <p class="description">${escapeHtml(product.description || '')}</p>
+  const renderSwatches = () => {
+    if (!swatchContainer) return;
+    swatchContainer.innerHTML = '';
 
-          <form class="product-purchase" data-product-form>
-            <fieldset>
-              <legend>Colour</legend>
-              <div class="swatch-list">${renderColourButtons(product, activeColourId)}</div>
-            </fieldset>
+    displayColours.forEach((colour) => {
+      const available = isColourAvailable(colour.id);
+      const label = available ? colour.name : `${colour.name} — Out of Stock`;
+      const swatch = document.createElement('button');
+      swatch.type = 'button';
+      swatch.className = `colour-swatch ${colour.id === state.colourId ? 'is-active' : ''} ${!available ? 'is-disabled' : ''}`;
+      swatch.style.backgroundColor = colour.hex_code;
+      swatch.dataset.colourId = colour.id;
+      swatch.title = label;
+      swatch.setAttribute('aria-label', label);
+      swatchContainer.appendChild(swatch);
+    });
+  };
 
-            <fieldset>
-              <legend>Size</legend>
-              <div class="size-list">${renderSizeButtons(product, activeColourId, activeVariant?.id)}</div>
-            </fieldset>
+  const renderSizes = () => {
+    if (!sizeContainer) return;
+    sizeContainer.innerHTML = '';
 
-            <p class="variant-note" data-variant-note>${escapeHtml(getVariantNote(activeVariant))}</p>
+    const colourActive = isColourActive(state.colourId);
+    const sizeVariants = variants
+      .filter((variant) => variant.colour_id === state.colourId)
+      .sort((a, b) => a.size - b.size);
 
-            <div class="purchase-row">
-              <label>
-                Qty
-                <input id="quantity" type="number" min="1" max="${effectiveMax}" value="1">
-              </label>
-              <button class="button button-dark" type="submit" ${activeVariant ? '' : 'disabled'}>Add to bag</button>
-            </div>
-          </form>
-        </section>
-      `;
+    sizeVariants.forEach((variant) => {
+      const available = colourActive && (variant.stock_quantity > 0 || variant.is_preorder_available);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `size-option ${state.size === variant.size ? 'is-active' : ''} ${!available ? 'is-disabled' : ''}`;
+      button.textContent = String(variant.size);
+      button.disabled = !available;
+      button.dataset.size = String(variant.size);
+      sizeContainer.appendChild(button);
+    });
 
-      renderGallery(product, activeColourId);
+    if (!sizeVariants.some((variant) => variant.size === state.size && colourActive && (variant.stock_quantity > 0 || variant.is_preorder_available))) {
+      state.size = null;
+    }
+  };
 
-      detail.querySelector('[data-product-form]').addEventListener('click', (event) => {
-        const colourButton = event.target.closest('[data-colour-id]');
-        const sizeButton = event.target.closest('[data-variant-id]');
+  const updateAddState = () => {
+    if (!addButton) return;
 
-        if (colourButton) {
-          activeColourId = colourButton.dataset.colourId;
-          activeVariant = getAvailableVariants(product).find((variant) => variant.colour_id === activeColourId) || null;
-          render();
-        }
+    if (!isColourActive(state.colourId)) {
+      addButton.disabled = true;
+      addButton.textContent = 'Out of Stock';
+      if (stockNote) stockNote.textContent = '';
+      return;
+    }
 
-        if (sizeButton) {
-          activeVariant = getActiveVariants(product).find((variant) => variant.id === sizeButton.dataset.variantId) || activeVariant;
-          render();
-        }
-      });
+    if (!state.size) {
+      addButton.disabled = true;
+      addButton.textContent = 'Select a Size';
+      if (stockNote) stockNote.textContent = '';
+      return;
+    }
 
-      detail.querySelector('#quantity')?.addEventListener('input', (event) => {
-        const clamped = Math.min(Math.max(Number(event.target.value || 1), 1), effectiveMax);
-        event.target.value = clamped;
-      });
+    const variant = currentVariant();
+    if (!variant || (variant.stock_quantity <= 0 && !variant.is_preorder_available)) {
+      addButton.disabled = true;
+      addButton.textContent = 'Out of Stock';
+      if (stockNote) stockNote.textContent = '';
+      return;
+    }
 
-      detail.querySelector('[data-product-form]').addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (!activeVariant) return;
+    addButton.disabled = false;
 
-        const colour = colours.find((item) => item.id === activeVariant.colour_id);
-        const image = getPrimaryImage(product, activeVariant.colour_id);
-        const quantity = Math.min(Math.max(Number(detail.querySelector('#quantity').value || 1), 1), effectiveMax);
+    if (variant.stock_quantity <= 0 && variant.is_preorder_available) {
+      addButton.textContent = 'Preorder';
+      stockNote && (stockNote.textContent = variant.preorder_delivery_days
+        ? `Ships in ~${variant.preorder_delivery_days} days`
+        : 'Available for preorder');
+    } else {
+      addButton.textContent = 'Add to Cart';
+      stockNote && (stockNote.textContent = variant.stock_quantity <= 5 ? `Only ${variant.stock_quantity} left` : '');
+    }
+  };
 
-        addToCart({
-          id: activeVariant.id,
-          productId: product.id,
-          variantId: activeVariant.id,
-          sku: activeVariant.sku,
-          name: product.name,
-          slug: product.slug,
-          brand: brandName,
-          colour: colour?.name || '',
-          size: activeVariant.size,
-          price: Number(product.price),
-          image: image.url,
-          stock: Number(activeVariant.stock_quantity || 0),
-          isPreorder: activeVariant.is_preorder_available && Number(activeVariant.stock_quantity || 0) <= 0,
-        }, quantity);
+  const resetQuantity = () => {
+    state.quantity = 1;
+    if (qtyValue) qtyValue.textContent = '1';
+  };
 
-        window.location.href = 'checkout.html';
-      });
-    };
+  const renderAll = () => {
+    renderGallery();
+    renderSwatches();
+    renderSizes();
+    resetQuantity();
+    updateAddState();
+  };
 
-    render();
-  } catch (error) {
-    renderState(
-      detail,
-      'error',
-      error.message || 'We could not load this product.',
-      '<a class="text-link" href="shop.html">Back to shop</a>',
-    );
-  }
+  swatchContainer?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-colour-id]');
+    if (!button) return;
+    state.colourId = button.dataset.colourId;
+    renderAll();
+  });
+
+  sizeContainer?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-size]');
+    if (!button || button.disabled) return;
+    state.size = Number(button.dataset.size);
+    renderSizes();
+    updateAddState();
+  });
+
+  galleryThumbs?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-index]');
+    if (!button || !galleryMain) return;
+    const index = Number(button.dataset.index);
+    galleryMain.scrollTo({ left: galleryMain.clientWidth * index, behavior: 'smooth' });
+    galleryThumbs.querySelectorAll('.pdp-gallery__thumb').forEach((thumb) => thumb.classList.remove('is-active'));
+    button.classList.add('is-active');
+  });
+
+  document.querySelector('[data-qty-dec]')?.addEventListener('click', () => {
+    state.quantity = Math.max(1, state.quantity - 1);
+    if (qtyValue) qtyValue.textContent = String(state.quantity);
+  });
+
+  document.querySelector('[data-qty-inc]')?.addEventListener('click', () => {
+    const variant = currentVariant();
+    const max = variant ? (variant.stock_quantity > 0 ? variant.stock_quantity : 10) : 1;
+    state.quantity = Math.min(max, state.quantity + 1);
+    if (qtyValue) qtyValue.textContent = String(state.quantity);
+  });
+
+  addButton?.addEventListener('click', () => {
+    const variant = currentVariant();
+    if (!variant) return;
+
+    addToCart({
+      variantId: variant.id,
+      productId: product.id,
+      productSlug: product.slug,
+      name: product.name,
+      brand: product.brands?.name ?? '',
+      colour: displayColours.find((colour) => colour.id === state.colourId)?.name ?? '',
+      size: variant.size,
+      price: product.price,
+      image: activeImages[0]?.image_url ?? null,
+      altImage: altImageFor(activeImages)?.image_url ?? null,
+      quantity: state.quantity,
+      stock: variant.stock_quantity,
+      isPreorder: variant.is_preorder_available,
+    });
+
+    const previousLabel = addButton.textContent;
+    addButton.textContent = 'Added ✓';
+    setTimeout(() => { if (!addButton.disabled) addButton.textContent = previousLabel; }, 1200);
+
+    document.querySelector('[data-cart-toggle]')?.dispatchEvent(new MouseEvent('click'));
+  });
+
+  renderAll();
+  renderRelatedProducts(product.id);
 };
-
-initHomePage();
-initShopPage();
-initProductPage();

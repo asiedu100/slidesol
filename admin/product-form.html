@@ -1,1 +1,135 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Product | SLIDESOL Studio</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a href="index.html">Overview</a><a class="active" href="products.html">Products</a><a href="brands.html">Brands</a><a href="orders.html">Orders</a><a href="customers.html">Customers</a></nav><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><a class="back-link" href="products.html">← Products</a><p class="eyebrow">Catalog</p><h1 id="product-form-heading">New product</h1><form class="product-form" id="product-core-form"><label>Name<input type="text" name="name" required placeholder="Product name"></label><label>Slug<input type="text" name="slug" placeholder="auto-generated"></label><label>Brand<select name="brand_id" required></select></label><label>Description<textarea name="description" rows="5" placeholder="Tell the story of this object"></textarea></label><label>Price (GHS)<input type="number" name="price" min="0" step="0.01" required></label><label class="checkbox-label"><input type="checkbox" name="is_active" checked>Active</label><button class="button button-dark" type="submit" id="product-save-button">Save and continue</button></form><p class="form-notice" data-product-notice role="alert"></p><div id="product-sections" hidden><section class="admin-panel"><div class="panel-heading"><h2>Colours</h2></div><form class="inline-form" id="colour-create-form"><label>Name<input type="text" name="name" required placeholder="e.g. Black"></label><label>Hex<input type="text" name="hex_code" placeholder="#111111"></label><button class="button button-dark" type="submit">Add colour</button></form><div class="chip-list" id="colour-list"></div></section><section class="admin-panel"><div class="panel-heading"><h2>Variants &amp; stock</h2></div><div id="variants-by-colour"></div></section><section class="admin-panel"><div class="panel-heading"><h2>Images</h2></div><div id="images-by-colour"></div></section></div></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { initProductForm } from '../js/admin/product-form.js'; requireAdmin(() => initProductForm());</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field"><label for="email">Email</label><input type="email" id="email" name="email" required autocomplete="username"></div>
+        <div class="form-field"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="products.html" aria-current="page">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html">Orders</a>
+        <a href="customers.html">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head">
+        <h1 data-form-title>Product</h1>
+        <a class="button-secondary" href="products.html">← All Products</a>
+      </div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+
+      <div class="admin-card">
+        <h2>Details</h2>
+        <form data-product-form class="admin-form-grid" novalidate>
+          <div class="form-field"><label for="p-name">Name</label><input type="text" id="p-name" name="name" required maxlength="300"></div>
+          <div class="form-field"><label for="p-brand">Brand</label><select id="p-brand" name="brand_id" data-brand-select required></select></div>
+          <div class="form-field"><label for="p-price">Price (GH₵)</label><input type="number" id="p-price" name="price" min="0" step="0.01" required></div>
+          <div class="form-field">
+            <label for="p-gender">Gender</label>
+            <select id="p-gender" name="gender">
+              <option value="unisex">Unisex</option>
+              <option value="men">Men</option>
+              <option value="women">Women</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="p-active">Status</label>
+            <label class="admin-checkbox-label"><input type="checkbox" id="p-active" name="is_active" checked> Active (visible on the storefront)</label>
+          </div>
+          <div class="form-field admin-form-full"><label for="p-description">Description</label><textarea id="p-description" name="description" rows="3" maxlength="5000"></textarea></div>
+          <button type="submit" class="button-primary admin-form-submit">Save Product</button>
+        </form>
+      </div>
+
+      <div data-catalogue-section hidden>
+        <div class="admin-card">
+          <h2>Colours</h2>
+          <div data-colours-list class="admin-inline-list"></div>
+          <form data-add-colour-form class="admin-form-grid admin-form-grid--spaced" novalidate>
+            <div class="form-field"><label for="c-name">Colour Name</label><input type="text" id="c-name" name="name" required maxlength="100"></div>
+            <div class="form-field"><label for="c-hex">Hex Code (optional)</label><input type="text" id="c-hex" name="hex_code" placeholder="#000000" maxlength="7"></div>
+            <button type="submit" class="button-secondary admin-form-submit">Add Colour</button>
+          </form>
+        </div>
+
+        <div class="admin-card">
+          <h2>Add a Size</h2>
+          <form data-add-variant-form class="admin-form-grid" hidden novalidate>
+            <div class="form-field"><label for="v-colour">Colour</label><select id="v-colour" name="colour_id" data-variant-colour-select required></select></div>
+            <div class="form-field"><label for="v-size">Size</label><input type="text" id="v-size" name="size" required maxlength="20" placeholder="e.g. 42"></div>
+            <div class="form-field"><label for="v-stock">Stock</label><input type="number" id="v-stock" name="stock_quantity" min="0" value="0"></div>
+            <div class="form-field">
+              <label for="v-preorder">&nbsp;</label>
+              <label class="admin-checkbox-label"><input type="checkbox" id="v-preorder" name="is_preorder_available"> Available for preorder</label>
+            </div>
+            <button type="submit" class="button-secondary admin-form-submit">Add Size</button>
+          </form>
+        </div>
+
+        <div class="admin-card">
+          <h2>Photos</h2>
+          <p class="admin-empty admin-empty--inline">Photos attach to a colour — add one above first to unlock uploads.</p>
+          <div class="admin-image-grid" data-images-grid></div>
+          <form data-upload-image-form class="admin-form-grid admin-form-grid--spaced" hidden novalidate>
+            <div class="form-field"><label for="i-colour">Colour</label><select id="i-colour" name="colour_id" data-image-colour-select required></select></div>
+            <div class="form-field"><label for="i-file">Image (JPEG/PNG/WEBP/GIF, max 5MB)</label><input type="file" id="i-file" name="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div>
+            <div class="form-field">
+              <label for="i-angle">Angle</label>
+              <select id="i-angle" name="shot_angle">
+                <option value="">Unspecified</option>
+                <option value="hero">Hero (3/4)</option>
+                <option value="side">Side</option>
+                <option value="top">Top</option>
+                <option value="back">Back</option>
+              </select>
+            </div>
+            <div class="form-field"><label for="i-alt">Alt Text (optional)</label><input type="text" id="i-alt" name="alt_text" maxlength="300"></div>
+            <button type="submit" class="button-secondary admin-form-submit">Upload Photo</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin } from '../js/admin/auth.js';
+    import { initProductFormPage } from '../js/admin/products.js';
+
+    requireAdmin(() => {
+      initProductFormPage();
+    });
+  </script>
+</body>
+</html>

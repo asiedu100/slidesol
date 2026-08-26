@@ -2,10 +2,10 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
 import { isForeignKeyViolation } from '../_shared/pg-error.ts';
 import {
-  HEX_COLOUR_RE, isNonEmptyString, isOptionalString, parseJsonBody,
+  HEX_COLOUR_RE, isBoolean, isNonEmptyString, isOptionalString, parseJsonBody,
 } from './validation.ts';
 
-const COLOUR_SELECT = 'id, product_id, name, hex_code, created_at';
+const COLOUR_SELECT = 'id, product_id, name, hex_code, is_active, created_at';
 
 export const create = async (supabase: SupabaseClient, req: Request, productId: string): Promise<Response> => {
   const { data: product, error: productError } = await supabase.from('products').select('id').eq('id', productId).maybeSingle();
@@ -25,6 +25,9 @@ export const create = async (supabase: SupabaseClient, req: Request, productId: 
   if (!isOptionalString(body.hex_code, 7) || (isNonEmptyString(body.hex_code) && !HEX_COLOUR_RE.test(body.hex_code as string))) {
     return errorResponse(400, 'validation_error', 'Hex code must look like #RRGGBB.');
   }
+  if (body.is_active !== undefined && !isBoolean(body.is_active)) {
+    return errorResponse(400, 'validation_error', 'is_active must be true or false.');
+  }
 
   const { data, error } = await supabase
     .from('product_colours')
@@ -32,6 +35,7 @@ export const create = async (supabase: SupabaseClient, req: Request, productId: 
       product_id: productId,
       name: (body.name as string).trim(),
       hex_code: isNonEmptyString(body.hex_code) ? (body.hex_code as string).toUpperCase() : null,
+      is_active: body.is_active ?? true,
     })
     .select(COLOUR_SELECT)
     .single();
@@ -61,6 +65,11 @@ export const update = async (supabase: SupabaseClient, req: Request, id: string)
       return errorResponse(400, 'validation_error', 'Hex code must look like #RRGGBB.');
     }
     patch.hex_code = isNonEmptyString(body.hex_code) ? (body.hex_code as string).toUpperCase() : null;
+  }
+
+  if (body.is_active !== undefined) {
+    if (!isBoolean(body.is_active)) return errorResponse(400, 'validation_error', 'is_active must be true or false.');
+    patch.is_active = body.is_active;
   }
 
   if (Object.keys(patch).length === 0) {

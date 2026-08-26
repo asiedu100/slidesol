@@ -1,159 +1,276 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="SLIDESOL curates premium slippers, slides and recovery footwear from leading global brands.">
-  <title>SLIDESOL | Premium slippers and slides</title>
+  <title>SLIDESOL — Premium Comfort Footwear</title>
+  <meta name="description" content="SLIDESOL is a premium footwear destination for slides, sandals and comfort shoes from OOFOS, Teva, Birkenstock, adidas and more.">
+  <link rel="canonical" href="https://slidesol.netlify.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SLIDESOL">
+  <meta property="og:title" content="SLIDESOL — Premium Comfort Footwear">
+  <meta property="og:description" content="SLIDESOL is a premium footwear destination for slides, sandals and comfort shoes from OOFOS, Teva, Birkenstock, adidas and more.">
+  <meta property="og:url" content="https://slidesol.netlify.app/">
+  <meta property="og:image" content="https://slidesol.netlify.app/assets/og/og-default.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SLIDESOL — Premium Comfort Footwear">
+  <meta name="twitter:description" content="SLIDESOL is a premium footwear destination for slides, sandals and comfort shoes from OOFOS, Teva, Birkenstock, adidas and more.">
+  <meta name="twitter:image" content="https://slidesol.netlify.app/assets/og/og-default.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/favicon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <noscript><style>[data-reveal] { opacity: 1; transform: none; }</style></noscript>
 </head>
 <body>
   <header class="site-header">
-    <a class="site-logo" href="index.html" aria-label="SLIDESOL home">SLIDESOL</a>
-
-    <nav class="desktop-nav" aria-label="Primary navigation">
-      <a href="shop.html">Shop</a>
-      <a href="#featured-brands">Brands</a>
-      <a href="#about">About</a>
-    </nav>
-
-    <div class="header-actions">
-      <a class="cart-button" href="checkout.html" aria-label="Cart">
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="M6.5 8h11l-.9 11h-9.2L6.5 8Z"></path>
-          <path d="M9 8a3 3 0 0 1 6 0"></path>
-        </svg>
-        <span data-cart-count>0</span>
-      </a>
-
-      <details class="mobile-menu">
-        <summary aria-label="Open menu">
-          <span></span>
-          <span></span>
-        </summary>
-        <nav aria-label="Mobile navigation">
-          <a href="shop.html">Shop</a>
-          <a href="#featured-brands">Brands</a>
-          <a href="#about">About</a>
-        </nav>
-      </details>
+    <div class="site-header__inner">
+      <a class="site-logo" href="index.html" aria-label="SLIDESOL — home">SLIDESOL</a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="shop.html">Shop</a>
+        <a href="index.html#brands">Brands</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="site-header__actions">
+        <button type="button" class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <a class="cart-toggle" href="#" aria-label="Cart" data-cart-toggle>Cart<span class="cart-toggle__count" data-cart-count hidden>0</span></a>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="hero-section">
-      <div class="hero-content">
-        <p class="eyebrow">Premium slides, clogs and slippers</p>
-        <h1>Step into comfort without stepping away from style.</h1>
-        <p class="hero-text">SLIDESOL curates refined everyday footwear from Nike, adidas, Crocs, OOFOS, Birkenstock, Havaianas and other comfort-first brands.</p>
-        <a class="button button-dark" href="shop.html">Shop Collection</a>
+  <div class="mobile-nav" data-mobile-nav>
+    <div class="mobile-nav__head">
+      <a class="site-logo" href="index.html" aria-label="SLIDESOL — home">SLIDESOL</a>
+      <button type="button" class="mobile-nav__close" data-mobile-nav-close aria-label="Close menu">Close</button>
+    </div>
+    <nav class="mobile-nav__links" aria-label="Primary">
+      <a href="shop.html">Shop</a>
+      <a href="index.html#brands">Brands</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+
+  <div class="cart-drawer" data-cart-drawer>
+    <div class="cart-drawer__backdrop" data-cart-drawer-backdrop></div>
+    <div class="cart-drawer__panel" role="dialog" aria-modal="true" aria-label="Cart">
+      <div class="cart-drawer__head">
+        <p class="eyebrow">Your Cart</p>
+        <button type="button" class="cart-drawer__close" data-cart-drawer-close aria-label="Close cart">Close</button>
       </div>
-
-      <figure class="hero-media" data-hero-carousel>
-        <img class="hero-slide is-active" src="https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=1500&q=90" alt="Premium slippers styled on a clean studio surface">
-        <img class="hero-slide" src="https://images.unsplash.com/photo-1622920799137-86c891159e44?auto=format&fit=crop&w=1500&q=90" alt="Nike slide sandals shot from above on a wet turquoise surface">
-        <img class="hero-slide" src="https://images.unsplash.com/photo-1620288091141-71640b6cd6f4?auto=format&fit=crop&w=1500&q=90" alt="Striped slide sandals resting in dry grass">
-        <img class="hero-slide" src="https://images.unsplash.com/photo-1603145733190-59811e523c72?auto=format&fit=crop&w=1500&q=90" alt="Classic white rubber clog worn outdoors">
-        <figcaption>New season comfort edit</figcaption>
-      </figure>
-    </section>
-
-    <section class="brand-section" id="featured-brands" aria-labelledby="brands-title" data-reveal>
-      <div class="section-heading">
-        <p class="eyebrow">Featured brands</p>
-        <h2 id="brands-title">A sharp edit of global comfort icons.</h2>
-      </div>
-
-      <div class="brand-grid">
-        <a href="shop.html?brand=nike">Nike</a>
-        <a href="shop.html?brand=adidas">adidas</a>
-      
-        <a href="shop.html?brand=crocs">Crocs</a>
-        <a href="shop.html?brand=oofos">OOFOS</a>
-        <a href="shop.html?brand=teva">Teva</a>
-        <a href="shop.html?brand=christian-louboutin">Christian Louboutin</a>
-        <a href="shop.html?brand=reef">REEF</a>
-        <a href="shop.html?brand=yeezy">Yeezy</a>
-        <a href="shop.html?brand=birkenstock">Birkenstock</a>
-        <a href="shop.html?brand=havaianas">Havaianas</a>
-        <a href="shop.html?brand=ipanema">Ipanema</a>
-        <a href="shop.html?brand=lululemon">Lululemon</a>
-      </div>
-    </section>
-
-    <section class="products-section" id="featured-products" aria-labelledby="products-title" data-reveal>
-      <div class="section-heading split-heading">
-        <div>
-          <p class="eyebrow">Featured products</p>
-          <h2 id="products-title">Pairs made for the daily rotation.</h2>
+      <div class="cart-drawer__items" data-cart-items></div>
+      <p class="cart-drawer__empty" data-cart-empty hidden>Your cart is empty.</p>
+      <div class="cart-drawer__footer" data-cart-footer hidden>
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <span data-cart-subtotal>GH₵0.00</span>
         </div>
-        <a class="text-link" href="shop.html">View all products</a>
+        <a class="button-primary" href="checkout.html">Checkout</a>
       </div>
+    </div>
+  </div>
 
-      <div class="product-grid" id="featured-product-grid"></div>
+  <main>
+    <section class="hero" data-hero>
+      <!-- Real photography, one shot per carried brand (see js/store/placeholder-photos.js
+           for the matching fallback pool). Decorative atmosphere only, not tied to any
+           specific product/price/stock. -->
+      <div class="hero__photo-layer" aria-hidden="true">
+        <div class="hero__photo hero__photo--1"></div>
+        <div class="hero__photo hero__photo--2"></div>
+        <div class="hero__photo hero__photo--3"></div>
+        <div class="hero__photo hero__photo--4"></div>
+        <div class="hero__photo hero__photo--5"></div>
+        <div class="hero__photo hero__photo--6"></div>
+        <div class="hero__photo hero__photo--7"></div>
+        <div class="hero__photo hero__photo--8"></div>
+        <div class="hero__photo hero__photo--9"></div>
+        <div class="hero__scrim"></div>
+      </div>
+      <div class="hero__content container">
+        <p class="hero__wordmark">SLIDESOL</p>
+        <h1 class="hero__headline">
+          <span class="hero__word hero__word--1">MOVE</span>
+          <span class="hero__word hero__word--2">DIFFERENT.</span>
+        </h1>
+        <div class="hero__actions">
+          <a class="hero__cta" href="shop.html">Shop Now</a>
+        </div>
+      </div>
+      <div class="hero__cue" aria-hidden="true">
+        <span class="hero__cue-line"></span>
+        <span class="hero__cue-label">Scroll</span>
+      </div>
     </section>
 
-    <section class="promo-section" data-reveal>
-      <div class="promo-image">
-        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=90" alt="Fashion footwear styling with premium summer clothing">
-      </div>
-      <div class="promo-content">
-        <p class="eyebrow">The weekend pair</p>
-        <h2>Clean silhouettes for pool days, airport days and everything after.</h2>
-        <p>Choose from versatile neutrals, bold seasonal colours and recovery-focused soles built for long wear.</p>
-        <a class="button button-light" href="shop.html">Explore the edit</a>
+    <section class="editorial-intro" data-reveal>
+      <div class="container">
+        <p class="editorial-intro__quote">Comfort was never the compromise.</p>
+        <p class="editorial-intro__note">Considered materials. Considered fit. Nothing else.</p>
       </div>
     </section>
 
-    <section class="why-section" id="about" aria-labelledby="why-title" data-reveal>
-      <div class="section-heading">
-        <p class="eyebrow">Why SLIDESOL</p>
-        <h2 id="why-title">Premium service from selection to doorstep.</h2>
+    <section class="brand-shop" data-reveal aria-labelledby="brand-shop-heading">
+      <div class="container section-head">
+        <p class="eyebrow">Shop By Brand</p>
+        <h2 id="brand-shop-heading">Your favourites, all in one place.</h2>
       </div>
+      <div class="container brand-shop__grid" data-brand-grid></div>
+    </section>
 
-      <div class="why-grid">
-        <article>
-          <span>01</span>
-          <h3>Quality footwear</h3>
-          <p>Every pair is selected for comfort, finish, brand trust and everyday wearability.</p>
+    <section class="category-story" data-reveal aria-labelledby="category-story-heading">
+      <div class="container section-head">
+        <p class="eyebrow">Shop By Feeling</p>
+        <h2 id="category-story-heading">Find your pace.</h2>
+      </div>
+      <div data-category-panels></div>
+    </section>
+
+    <section class="featured-products" data-reveal aria-labelledby="featured-products-heading" data-featured-products-section hidden>
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Shop The Edit</p>
+
+          <h2 id="featured-products-heading">Featured Products</h2>
+        </div>
+        <div class="featured-products__grid" data-products-grid></div>
+        <button type="button" class="featured-products__more" data-products-show-more hidden>Show More</button>
+      </div>
+    </section>
+
+    <section class="campaign-break" data-reveal>
+      <div class="container">
+        <p class="eyebrow">Slidesol Life</p>
+        <p class="campaign-break__word">EASE.</p>
+      </div>
+    </section>
+
+    <section class="featured-collection" data-reveal aria-labelledby="featured-collection-heading">
+      <div class="container section-head">
+        <p class="eyebrow">New In</p>
+        <h2 id="featured-collection-heading">Featured Collection</h2>
+      </div>
+      <div class="featured-collection__rail" data-featured-rail></div>
+      <p class="featured-collection__empty" data-featured-empty hidden>New arrivals launching soon.</p>
+    </section>
+
+    <section class="trust-strip">
+      <div class="container trust-strip__row">
+        <p>Secure Payment</p>
+        <p>Worldwide Delivery</p>
+        <p>Easy Ordering</p>
+        <p>Pickup Available</p>
+      </div>
+    </section>
+
+    <section class="location" data-reveal aria-labelledby="location-heading">
+      <div class="container section-head">
+        <p class="eyebrow">Visit Us</p>
+        <h2 id="location-heading">Pickup &amp; Delivery</h2>
+      </div>
+      <div class="container location__list">
+        <article class="location__item">
+          <iframe
+            class="location__media"
+            src="https://www.google.com/maps?q=6.69433,-1.62331&z=15&output=embed"
+            title="SLIDESOL Kumasi location map"
+            loading="lazy"
+          ></iframe>
+          <div class="location__details">
+            <p class="eyebrow">Kumasi</p>
+            <dl class="location__facts">
+              <div>
+                <dt>Address</dt>
+                <dd>Adum Prisons Roundabout, Kumasi</dd>
+              </div>
+              <div>
+                <dt>Hours</dt>
+                <dd>Mon–Sat: 8:00 AM–5:00 PM<br>Sunday: Closed</dd>
+              </div>
+            </dl>
+            <div class="location__actions">
+              <a class="link-underline" href="https://www.google.com/maps/search/?api=1&query=6.69433,-1.62331" target="_blank" rel="noopener">Get Directions</a>
+              <a class="link-underline" href="https://wa.me/233549436004" target="_blank" rel="noopener">WhatsApp Us</a>
+            </div>
+          </div>
         </article>
-        <article>
-          <span>02</span>
-          <h3>Secure payment</h3>
-          <p>Checkout is designed for protected Paystack payments when ordering is connected.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h3>Delivery</h3>
-          <p>Choose delivery or pickup, with clear fulfilment details before payment.</p>
-        </article>
-        <article>
-          <span>04</span>
-          <h3>Easy ordering</h3>
-          <p>No customer account required for the MVP. Pick a colour, choose a size and check out.</p>
+        <article class="location__item">
+          <iframe
+            class="location__media"
+            src="https://www.google.com/maps?q=5.664926,-0.154927&z=15&output=embed"
+            title="SLIDESOL Accra location map"
+            loading="lazy"
+          ></iframe>
+          <div class="location__details">
+            <p class="eyebrow">Accra</p>
+            <dl class="location__facts">
+              <div>
+                <dt>Address</dt>
+                <dd>East Legon, Accra</dd>
+              </div>
+              <div>
+                <dt>Hours</dt>
+                <dd>Mon–Sat: 8:00 AM–5:00 PM<br>Sunday: Closed</dd>
+              </div>
+            </dl>
+            <div class="location__actions">
+              <a class="link-underline" href="https://maps.app.goo.gl/jndk4WTAJtbx8n7j8?g_st=iw" target="_blank" rel="noopener">Get Directions</a>
+              <a class="link-underline" href="https://wa.me/233549436004" target="_blank" rel="noopener">WhatsApp Us</a>
+            </div>
+          </div>
         </article>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div>
-      <a class="footer-logo" href="index.html">SLIDESOL</a>
-      <p>Premium slippers, slides and recovery footwear curated for modern everyday comfort.</p>
+    <div class="site-footer__inner">
+      <div>
+        <p class="site-footer__wordmark">SLIDESOL</p>
+        <p class="site-footer__tagline">Move different.</p>
+      </div>
+      <nav class="site-footer__col" aria-label="Shop">
+        <p class="site-footer__col-title">Shop</p>
+        <a href="shop.html">All Slides</a>
+        <a href="index.html#brands">Brands</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Help">
+        <p class="site-footer__col-title">Help</p>
+        <a href="contact.html">Contact</a>
+        <a href="index.html#location">Pickup &amp; Delivery</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Company">
+        <p class="site-footer__col-title">Company</p>
+        <a href="contact.html">About</a>
+      </nav>
     </div>
-
-    <nav aria-label="Footer navigation">
-      <a href="shop.html">Shop</a>
-      <a href="#featured-brands">Brands</a>
-      <a href="#about">About</a>
-    </nav>
-
-    <p class="footer-note">Curated in Ghana for modern comfort.</p>
+    <div class="site-footer__legal">
+      <p>&copy; <span data-year></span> SLIDESOL. Delivery available in Ghana.</p>
+    </div>
   </footer>
 
-  <script type="module" src="js/store/products.js"></script>
-  <script type="module" src="js/store/cart.js"></script>
-  <script type="module" src="js/motion.js"></script>
+  <script type="module">
+    import { initHeroReveal, initHeaderScrollState, initScrollReveal, initMobileNav } from './js/motion.js';
+    import { initHomepageCatalogue } from './js/store/products.js';
+    import { initCartBadge, initCartDrawer } from './js/store/cart.js';
+
+    document.querySelector('[data-year]').textContent = new Date().getFullYear();
+    initHeroReveal();
+    initHeaderScrollState();
+    initMobileNav();
+    initCartBadge();
+    initCartDrawer();
+
+    initHomepageCatalogue().finally(initScrollReveal);
+  </script>
+
+  <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.373 3 4 8.373 4 15c0 2.386.694 4.612 1.888 6.488L4 29l7.716-1.847A11.94 11.94 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm6.16 16.9c-.257.724-1.485 1.383-2.058 1.44-.526.052-1.19.074-1.921-.12-.443-.117-1.012-.313-1.742-.61-3.067-1.253-5.07-4.32-5.223-4.52-.153-.2-1.25-1.66-1.25-3.166 0-1.505.79-2.245 1.07-2.553.28-.308.61-.385.813-.385.204 0 .407.002.585.011.188.009.44-.071.688.526.257.615.874 2.12.951 2.274.077.153.128.332.026.535-.102.204-.153.332-.306.51-.153.179-.322.4-.46.537-.153.153-.313.319-.135.626.179.307.796 1.313 1.708 2.126 1.174 1.046 2.164 1.37 2.47 1.523.307.153.485.128.664-.077.179-.204.766-.894.97-1.201.204-.307.408-.256.688-.153.28.102 1.784.842 2.09.995.307.153.51.23.587.358.077.128.077.74-.18 1.464z"/></svg>
+  </a>
 </body>
 </html>

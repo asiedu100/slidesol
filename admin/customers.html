@@ -1,1 +1,69 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Customers | SLIDESOL Studio</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a href="index.html">Overview</a><a href="products.html">Products</a><a href="brands.html">Brands</a><a href="orders.html">Orders</a><a class="active" href="customers.html">Customers</a></nav><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><p class="eyebrow">Relationships</p><h1>Customers</h1><section class="admin-panel table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Orders</th><th>Total spent</th><th></th></tr></thead><tbody id="admin-customers"></tbody></table></section></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { renderAdminCustomers } from '../js/admin/customers.js'; requireAdmin(() => renderAdminCustomers());</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customers — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field"><label for="email">Email</label><input type="email" id="email" name="email" required autocomplete="username"></div>
+        <div class="form-field"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html">Orders</a>
+        <a href="customers.html" aria-current="page">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head"><h1>Customers</h1></div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Orders</th><th>Total Spent</th></tr></thead>
+          <tbody data-customers-table></tbody>
+        </table>
+        <p class="admin-empty" data-customers-empty hidden>No customers yet.</p>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin } from '../js/admin/auth.js';
+    import { initCustomersPage } from '../js/admin/orders.js';
+
+    requireAdmin(() => {
+      initCustomersPage();
+    });
+  </script>
+</body>
+</html>

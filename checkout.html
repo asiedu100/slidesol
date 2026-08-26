@@ -1,99 +1,204 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout | SLIDESOL</title>
+  <title>Checkout — SLIDESOL</title>
+  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/favicon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/checkout.css">
 </head>
 <body>
-  <header class="site-header">
-    <a class="wordmark" href="index.html">SLIDESOL</a>
-    <a class="back-link" href="shop.html">Continue shopping</a>
-    <span class="secure-note">Secure checkout next</span>
+  <header class="site-header is-solid">
+    <div class="site-header__inner">
+      <a class="site-logo" href="index.html" aria-label="SLIDESOL — home">SLIDESOL</a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="shop.html">Shop</a>
+        <a href="index.html#brands">Brands</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="site-header__actions">
+        <button type="button" class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <a class="cart-toggle" href="#" aria-label="Cart" data-cart-toggle>Cart<span class="cart-toggle__count" data-cart-count hidden>0</span></a>
+      </div>
+    </div>
   </header>
 
-  <main class="checkout-page">
-    <div class="checkout-main">
+  <div class="mobile-nav" data-mobile-nav>
+    <div class="mobile-nav__head">
+      <a class="site-logo" href="index.html" aria-label="SLIDESOL — home">SLIDESOL</a>
+      <button type="button" class="mobile-nav__close" data-mobile-nav-close aria-label="Close menu">Close</button>
+    </div>
+    <nav class="mobile-nav__links" aria-label="Primary">
+      <a href="shop.html">Shop</a>
+      <a href="index.html#brands">Brands</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+
+  <div class="cart-drawer" data-cart-drawer>
+    <div class="cart-drawer__backdrop" data-cart-drawer-backdrop></div>
+    <div class="cart-drawer__panel" role="dialog" aria-modal="true" aria-label="Cart">
+      <div class="cart-drawer__head">
+        <p class="eyebrow">Your Cart</p>
+        <button type="button" class="cart-drawer__close" data-cart-drawer-close aria-label="Close cart">Close</button>
+      </div>
+      <div class="cart-drawer__items" data-cart-items></div>
+      <p class="cart-drawer__empty" data-cart-empty hidden>Your cart is empty.</p>
+      <div class="cart-drawer__footer" data-cart-footer hidden>
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <span data-cart-subtotal>GH₵0.00</span>
+        </div>
+        <a class="button-primary" href="checkout.html">Checkout</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="checkout-head container">
       <p class="eyebrow">Checkout</p>
-      <h1>Complete your order.</h1>
+      <h1>Complete Your Order</h1>
+    </div>
 
-      <section class="cart-review" aria-label="Your bag">
-        <h2 class="cart-review-heading">Your bag</h2>
-        <div id="cart-lines"></div>
-      </section>
+    <p class="checkout-empty container" data-checkout-empty hidden>
+      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
+    </p>
 
-      <form class="checkout-form" id="checkout-form" novalidate>
-        <fieldset>
-          <legend>Your details</legend>
-
-          <label>
-            Full name
-            <input type="text" name="full_name" autocomplete="name" required>
-          </label>
-
-          <label>
-            Phone
-            <input type="tel" name="phone" autocomplete="tel" placeholder="024 000 0000" required>
-          </label>
-
-          <label>
-            Email <span class="optional-tag">(optional)</span>
-            <input type="email" name="email" autocomplete="email">
-          </label>
+    <div class="checkout container" data-checkout-form-section hidden>
+      <form class="checkout-form" data-checkout-form novalidate>
+        <fieldset class="checkout-fieldset">
+          <legend>Contact</legend>
+          <div class="form-field">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
+            </div>
+            <div class="form-field">
+              <label for="email">Email (optional)</label>
+              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
+            </div>
+          </div>
         </fieldset>
 
-        <fieldset>
+        <fieldset class="checkout-fieldset">
           <legend>Fulfilment</legend>
-
-          <div class="fulfilment-toggle" data-fulfilment-toggle>
-            <label>
+          <div class="fulfilment-options">
+            <label class="fulfilment-option">
               <input type="radio" name="fulfilment_method" value="delivery" checked>
               Delivery
             </label>
-            <label>
+            <label class="fulfilment-option">
               <input type="radio" name="fulfilment_method" value="pickup">
               Pickup
             </label>
           </div>
+
+          <div data-delivery-fields>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="region">Region</label>
+                <select id="region" name="region" data-region-select required>
+                  <option value="" disabled selected>Select region</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" maxlength="100" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="area">Area</label>
+                <input type="text" id="area" name="area" maxlength="100" required>
+              </div>
+              <div class="form-field">
+                <label for="address">Detailed Address</label>
+                <input type="text" id="address" name="address" maxlength="500" required>
+              </div>
+            </div>
+          </div>
         </fieldset>
 
-        <fieldset data-delivery-fields>
-          <legend>Delivery information</legend>
-
-          <label>
-            Region
-            <select name="delivery_region" data-region-select required></select>
-          </label>
-
-          <label>
-            City
-            <input type="text" name="delivery_city" required>
-          </label>
-
-          <label>
-            Area
-            <input type="text" name="delivery_area" required>
-          </label>
-
-          <label>
-            Delivery address
-            <textarea name="delivery_address" rows="3" required></textarea>
-          </label>
+        <fieldset class="checkout-fieldset">
+          <legend>Order Note</legend>
+          <div class="form-field">
+            <label for="customer_note">Anything we should know? (optional)</label>
+            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
+          </div>
         </fieldset>
 
-        <fieldset>
-          <legend>Order note <span class="optional-tag">(optional)</span></legend>
+        <p class="checkout-error" data-checkout-error hidden></p>
 
-          <textarea name="customer_note" rows="3" aria-label="Order note" placeholder="Anything we should know about your order?"></textarea>
-        </fieldset>
+        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
       </form>
-    </div>
 
-    <aside class="summary" id="order-summary"></aside>
+      <aside class="checkout-summary">
+        <h2>Order Summary</h2>
+        <div data-checkout-items></div>
+        <div class="checkout-totals">
+          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
+          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
+          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
+        </div>
+      </aside>
+    </div>
   </main>
 
-  <script type="module" src="js/store/checkout.js"></script>
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <p class="site-footer__wordmark">SLIDESOL</p>
+        <p class="site-footer__tagline">Move different.</p>
+      </div>
+      <nav class="site-footer__col" aria-label="Shop">
+        <p class="site-footer__col-title">Shop</p>
+        <a href="shop.html">All Slides</a>
+        <a href="index.html#brands">Brands</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Help">
+        <p class="site-footer__col-title">Help</p>
+        <a href="contact.html">Contact</a>
+        <a href="index.html#location">Pickup &amp; Delivery</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Company">
+        <p class="site-footer__col-title">Company</p>
+        <a href="contact.html">About</a>
+      </nav>
+    </div>
+    <div class="site-footer__legal">
+      <p>&copy; <span data-year></span> SLIDESOL. Delivery available in Ghana.</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initHeaderScrollState, initMobileNav } from './js/motion.js';
+    import { initCartBadge, initCartDrawer } from './js/store/cart.js';
+    import { initCheckoutPage } from './js/store/checkout.js';
+
+    document.querySelector('[data-year]').textContent = new Date().getFullYear();
+    initHeaderScrollState();
+    initMobileNav();
+    initCartBadge();
+    initCartDrawer();
+    initCheckoutPage();
+  </script>
+
+  <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.373 3 4 8.373 4 15c0 2.386.694 4.612 1.888 6.488L4 29l7.716-1.847A11.94 11.94 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm6.16 16.9c-.257.724-1.485 1.383-2.058 1.44-.526.052-1.19.074-1.921-.12-.443-.117-1.012-.313-1.742-.61-3.067-1.253-5.07-4.32-5.223-4.52-.153-.2-1.25-1.66-1.25-3.166 0-1.505.79-2.245 1.07-2.553.28-.308.61-.385.813-.385.204 0 .407.002.585.011.188.009.44-.071.688.526.257.615.874 2.12.951 2.274.077.153.128.332.026.535-.102.204-.153.332-.306.51-.153.179-.322.4-.46.537-.153.153-.313.319-.135.626.179.307.796 1.313 1.708 2.126 1.174 1.046 2.164 1.37 2.47 1.523.307.153.485.128.664-.077.179-.204.766-.894.97-1.201.204-.307.408-.256.688-.153.28.102 1.784.842 2.09.995.307.153.51.23.587.358.077.128.077.74-.18 1.464z"/></svg>
+  </a>
 </body>
 </html>

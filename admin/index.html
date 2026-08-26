@@ -1,1 +1,108 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Studio dashboard | SLIDESOL</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/admin.css"></head><body class="admin-shell"><aside class="admin-sidebar"><a class="wordmark" href="../index.html">SLIDESOL <span>STUDIO</span></a><nav><a class="active" href="index.html">Overview</a><a href="products.html">Products</a><a href="brands.html">Brands</a><a href="orders.html">Orders</a><a href="customers.html">Customers</a></nav><a href="../shop.html" class="store-link">View store ↗</a><button data-admin-logout class="logout-link" type="button">Sign out</button></aside><main class="admin-main"><p class="eyebrow">Friday, 21 August 2026</p><h1>Good morning, studio.</h1><div class="stat-grid"><div><span>Products</span><strong id="stat-products">—</strong></div><div><span>Orders</span><strong id="stat-orders">—</strong></div><div><span>Customers</span><strong id="stat-customers">—</strong></div></div><section class="admin-panel"><div class="panel-heading"><h2>Recent activity</h2><a href="orders.html" class="text-link">View all ↗</a></div><p class="empty-admin">Your most recent store activity will appear here.</p></section></main><script type="module">import { requireAdmin } from '../js/admin/auth.js'; import { dashboardStats } from '../js/admin/dashboard.js'; requireAdmin(() => { const stats = dashboardStats(); Object.entries(stats).forEach(([key, value]) => { const node = document.querySelector('#stat-' + key); if (node) node.textContent = value; }); });</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — SLIDESOL Studio</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-checking" data-admin-checking>Checking access…</div>
+
+  <div class="admin-login" data-admin-login hidden>
+    <div class="admin-login__card">
+      <p class="eyebrow">SLIDESOL Studio</p>
+      <h1>Admin Sign In</h1>
+      <form data-login-form novalidate>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="username">
+        </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+        <p class="admin-alert admin-alert--error" data-login-error hidden></p>
+        <button type="submit" class="button-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-app" data-admin-app hidden>
+    <aside class="admin-sidebar">
+      <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
+      <nav class="admin-nav">
+        <a href="index.html" aria-current="page">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="brands.html">Brands</a>
+        <a href="orders.html">Orders</a>
+        <a href="customers.html">Customers</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <p data-admin-name></p>
+        <button type="button" data-admin-signout>Sign Out</button>
+        <a href="../index.html">← Back to site</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-page-head">
+        <h1>Dashboard</h1>
+      </div>
+
+      <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
+
+      <div class="admin-stat-grid">
+        <div class="admin-stat"><p>Products</p><p data-stat-products>—</p></div>
+        <div class="admin-stat"><p>Brands</p><p data-stat-brands>—</p></div>
+        <div class="admin-stat"><p>Orders</p><p data-stat-orders>—</p></div>
+        <div class="admin-stat"><p>Customers</p><p data-stat-customers>—</p></div>
+      </div>
+
+      <div class="admin-card">
+        <h2>Recent Orders</h2>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Payment</th></tr>
+          </thead>
+          <tbody data-recent-orders></tbody>
+        </table>
+        <p class="admin-empty" data-recent-orders-empty hidden>No orders yet.</p>
+      </div>
+
+      <div class="admin-card">
+        <h2>Change Password</h2>
+        <form data-change-password-form class="admin-form-grid" novalidate>
+          <div class="form-field">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" name="current_password" required autocomplete="current-password">
+          </div>
+          <div class="form-field">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" name="new_password" required minlength="8" autocomplete="new-password">
+          </div>
+          <div class="form-field">
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password" name="confirm_password" required minlength="8" autocomplete="new-password">
+          </div>
+          <p class="admin-alert" data-change-password-message hidden></p>
+          <button type="submit" class="button-primary admin-form-submit">Update Password</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAdmin, initChangePasswordForm } from '../js/admin/auth.js';
+    import { initDashboard } from '../js/admin/dashboard.js';
+
+    requireAdmin(() => {
+      initDashboard();
+      initChangePasswordForm();
+    });
+  </script>
+</body>
+</html>

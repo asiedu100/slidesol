@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+
+# TODO: confirm the production domain (Netlify site name or custom domain) and update this URL in Phase 8
+Sitemap: https://slidesol.netlify.app/sitemap.xml
