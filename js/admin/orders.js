@@ -1,5 +1,5 @@
 import { formatMoney } from '../config.js';
-import { listOrders, getOrder, updateOrderStatus, listCustomers } from './api-client.js';
+import { listOrders, getOrder, updateOrderStatus, refundOrder, listCustomers } from './api-client.js';
 
 const showAlert = (el, message, type = 'error') => {
   if (!el) return;
@@ -127,13 +127,34 @@ export const initOrderDetailPage = async () => {
   document.querySelector('[data-order-total]').textContent = formatMoney(order.total_amount);
 
   const paymentStatusBadge = document.querySelector('[data-order-payment-status]');
-  if (paymentStatusBadge) {
-    paymentStatusBadge.className = `badge badge--${order.payment_status}`;
-    paymentStatusBadge.textContent = order.payment_status;
-  }
+  const refundButton = document.querySelector('[data-order-refund]');
+
+  const applyPaymentStatus = (status) => {
+    if (paymentStatusBadge) {
+      paymentStatusBadge.className = `badge badge--${status}`;
+      paymentStatusBadge.textContent = status;
+    }
+    if (refundButton) refundButton.hidden = status !== 'paid';
+  };
+
+  applyPaymentStatus(order.payment_status);
 
   const paymentRefEl = document.querySelector('[data-order-payment-ref]');
   if (paymentRefEl) paymentRefEl.textContent = payment?.transaction_reference ?? '—';
+
+  refundButton?.addEventListener('click', async () => {
+    if (!window.confirm('Refund this order? This calls Paystack and moves real money back to the customer — it cannot be undone from here.')) return;
+    refundButton.disabled = true;
+
+    try {
+      const result = await refundOrder(id);
+      applyPaymentStatus(result.order.payment_status);
+      showAlert(errorEl, 'Refunded — Paystack has accepted the request.', 'success');
+    } catch (error) {
+      showAlert(errorEl, error.message);
+      refundButton.disabled = false;
+    }
+  });
 
   const itemsBody = document.querySelector('[data-order-items]');
   items.forEach((item) => {

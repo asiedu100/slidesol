@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
+import { Image } from 'https://deno.land/x/imagescript@1.3.0/mod.ts';
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
 import { isForeignKeyViolation } from '../_shared/pg-error.ts';
 import { isNonEmptyString, parseJsonBody, UUID_RE } from './validation.ts';
@@ -8,6 +9,11 @@ const SHOT_ANGLES = ['hero', 'side', 'top', 'back'];
 const isShotAngle = (value: unknown): value is string => typeof value === 'string' && SHOT_ANGLES.includes(value);
 const BUCKET = 'product-images';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
+// Every upload is decoded and re-encoded as a JPEG capped at this size, regardless of the
+// source format — keeps Storage usage and page-load weight predictable as the catalogue
+// grows, instead of depending on whoever's uploading to resize/compress beforehand.
+const MAX_DIMENSION = 1600;
+const JPEG_QUALITY = 82;
 
 const ALLOWED_TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -98,9 +104,36 @@ export const create = async (supabase: SupabaseClient, req: Request, productId: 
     sortOrder = count ?? 0;
   }
 
-  const path = `products/${productId}/${colourId}/${crypto.randomUUID()}.${extension}`;
+  // Animated GIFs pass through unprocessed — decoding one as a static Image would discard the
+  // animation, and product photography practically never arrives as a GIF anyway. Everything
+  // else gets resized (if oversized) and re-encoded as a capped-quality JPEG.
+  let uploadBody: Uint8Array | File = file;
+  let uploadContentType = file.type;
+  let uploadExtension = extension;
 
-  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type });
+  if (file.type !== 'image/gif') {
+    try {
+      const decoded = await Image.decode(new Uint8Array(await file.arrayBuffer()));
+      if (Math.max(decoded.width, decoded.height) > MAX_DIMENSION) {
+        if (decoded.width >= decoded.height) {
+          decoded.resize(MAX_DIMENSION, Image.RESIZE_AUTO);
+        } else {
+          decoded.resize(Image.RESIZE_AUTO, MAX_DIMENSION);
+        }
+      }
+      uploadBody = await decoded.encodeJPEG(JPEG_QUALITY);
+      uploadContentType = 'image/jpeg';
+      uploadExtension = 'jpg';
+    } catch (error) {
+      // Don't fail the whole upload over a resize hiccup — fall back to storing the original
+      // file as-is, same as this endpoint always did before this optimization existed.
+      console.error('admin-catalogue/images: resize/re-encode failed, storing original', error);
+    }
+  }
+
+  const path = `products/${productId}/${colourId}/${crypto.randomUUID()}.${uploadExtension}`;
+
+  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, uploadBody, { contentType: uploadContentType });
   if (uploadError) {
     console.error('admin-catalogue/images: upload failed', uploadError);
     return errorResponse(500, 'server_error', 'Could not upload image.');

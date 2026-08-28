@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
-import { ADMIN_SETTABLE_ORDER_STATUSES } from '../_shared/constants.ts';
+import { ADMIN_SETTABLE_ORDER_STATUSES, ORDER_PAYMENT_STATUS, PAYMENT_STATUS } from '../_shared/constants.ts';
+import { refundTransaction } from '../_shared/paystack.ts';
 
 const ORDER_LIST_SELECT = `
   id, order_number, customer_id, fulfilment_method, total_amount, currency,
@@ -65,8 +66,10 @@ export const updateStatus = async (supabase: SupabaseClient, req: Request, id: s
     return errorResponse(400, 'validation_error', `order_status must be one of: ${ADMIN_SETTABLE_ORDER_STATUSES.join(', ')}.`);
   }
 
-  // Deliberately the only field this endpoint can ever touch — payment_status stays
-  // exclusively controlled by the verified Paystack webhook, never an admin action.
+  // Deliberately the only field this endpoint can ever touch — payment_status is never
+  // set directly from an admin-supplied value. The one exception is `refund` below, and
+  // even that never trusts an admin-supplied status — it only ever writes what Paystack's
+  // own refund API call reports back.
   const { data, error } = await supabase
     .from('orders')
     .update({ order_status: body.order_status })
@@ -83,4 +86,73 @@ export const updateStatus = async (supabase: SupabaseClient, req: Request, id: s
   }
 
   return jsonResponse(200, { order: data });
+};
+
+export const refund = async (supabase: SupabaseClient, id: string): Promise<Response> => {
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .select('id, payment_status')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (orderError) {
+    console.error('admin-orders/orders: refund order lookup failed', orderError);
+    return errorResponse(500, 'server_error', 'Could not process refund.');
+  }
+  if (!order) {
+    return errorResponse(404, 'not_found', 'Order not found.');
+  }
+
+  const { data: payment, error: paymentError } = await supabase
+    .from('payments')
+    .select('id, transaction_reference, status')
+    .eq('order_id', id)
+    .maybeSingle();
+
+  if (paymentError) {
+    console.error('admin-orders/orders: refund payment lookup failed', paymentError);
+    return errorResponse(500, 'server_error', 'Could not process refund.');
+  }
+
+  // The payment record, not the admin's request, is the source of truth for whether this
+  // is refundable — blocks refunding something unpaid or already refunded, server-side.
+  if (!payment || payment.status !== PAYMENT_STATUS.SUCCESS) {
+    return errorResponse(400, 'not_refundable', 'Only a paid order can be refunded.');
+  }
+
+  const result = await refundTransaction(payment.transaction_reference);
+  if (!result.ok) {
+    console.error('admin-orders/orders: paystack refund failed', result.errorMessage);
+    return errorResponse(502, 'refund_failed', result.errorMessage || 'Paystack could not process the refund.');
+  }
+
+  const refundedAt = new Date().toISOString();
+
+  const { error: paymentUpdateError } = await supabase
+    .from('payments')
+    .update({
+      status: PAYMENT_STATUS.REFUNDED,
+      refunded_at: refundedAt,
+      refund_reference: result.refundId != null ? String(result.refundId) : null,
+    })
+    .eq('id', payment.id);
+
+  if (paymentUpdateError) {
+    console.error('admin-orders/orders: refund payment update failed', paymentUpdateError);
+    return errorResponse(500, 'server_error', 'Paystack processed the refund, but saving it failed — check Paystack directly and contact support.');
+  }
+
+  const { data: updatedOrder, error: orderUpdateError } = await supabase
+    .from('orders')
+    .update({ payment_status: ORDER_PAYMENT_STATUS.REFUNDED })
+    .eq('id', id)
+    .select('id, payment_status')
+    .maybeSingle();
+
+  if (orderUpdateError) {
+    console.error('admin-orders/orders: refund order update failed', orderUpdateError);
+    return errorResponse(500, 'server_error', 'Paystack processed the refund, but saving it failed — check Paystack directly and contact support.');
+  }
+
+  return jsonResponse(200, { order: updatedOrder, refunded_at: refundedAt });
 };

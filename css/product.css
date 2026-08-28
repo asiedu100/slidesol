@@ -18,7 +18,7 @@
   scrollbar-width: none;
   aspect-ratio: 4 / 5;
   border-radius: 2px;
-  background: var(--color-stone);
+  background: #FFFFFF;
 }
 
 .pdp-gallery__main::-webkit-scrollbar { display: none; }
@@ -27,7 +27,8 @@
   flex: 0 0 100%;
   scroll-snap-align: start;
   overflow: hidden;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   filter: contrast(1.04) brightness(1.02);
   animation: ken-burns 16s var(--ease-premium) infinite alternate;
@@ -44,7 +45,9 @@
   width: 64px;
   height: 80px;
   flex-shrink: 0;
-  background-size: cover;
+  background-color: #FFFFFF;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   border: 1px solid transparent;
   border-radius: 2px;

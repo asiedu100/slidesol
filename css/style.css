@@ -536,13 +536,16 @@ h1, h2, h3 {
   aspect-ratio: 4 / 5;
   border-radius: 2px;
   overflow: hidden;
-  background: var(--color-stone);
+  /* Pure white, not the cream --color-stone token — the product photos themselves are all
+     shot on white, so this has to match exactly or the letterboxing shows as a visible seam. */
+  background: #FFFFFF;
 }
 
 .media-card__image {
   position: absolute;
   inset: 0;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   /* Contrast/brightness only — never hue or saturation, since colour is a
      real purchasable variant and must stay visually accurate. */
@@ -1068,7 +1071,7 @@ h1, h2, h3 {
   width: 80px;
   aspect-ratio: 4 / 5;
   flex-shrink: 0;
-  background: var(--color-stone);
+  background: #FFFFFF;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -1076,7 +1079,8 @@ h1, h2, h3 {
 .cart-row__media-layer {
   position: absolute;
   inset: 0;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
 }
 

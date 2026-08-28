@@ -23,12 +23,21 @@ const altImageFor = (sortedImages) => {
   return byAngle('side') || byAngle('back') || byAngle('top') || rest[0] || null;
 };
 
+// Each active product becomes one card per colourway that actually has a photo — a two-colour
+// product like a Louboutin flip-flop shows as two grid tiles, not one hiding the other colour
+// behind swatches on the product page. Products with a single colour just yield a single card,
+// same as before.
+//
+// Exception: colours similar enough in person that splitting them into separate tiles just
+// looks like a duplicate listing rather than a genuine choice — merged back to one tile here.
+const MERGE_COLOURS_FOR_SLUGS = new Set(['koyoto']);
+
 export const fetchActiveProducts = async () => {
   if (!supabase) return [];
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, slug, price, gender, created_at, brands(name, slug), product_images(image_url, sort_order, shot_angle)')
+    .select('id, name, slug, price, gender, created_at, brands(name, slug), product_colours(id, name), product_images(image_url, sort_order, shot_angle, colour_id)')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
@@ -37,21 +46,44 @@ export const fetchActiveProducts = async () => {
     return [];
   }
 
-  return (data || []).map((product) => {
-    const sortedImages = [...(product.product_images || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const cards = [];
 
-    return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: product.price,
-      gender: product.gender ?? 'unisex',
-      brand: product.brands?.name ?? '',
-      brandSlug: product.brands?.slug ?? '',
-      image: sortedImages[0]?.image_url ?? null,
-      altImage: altImageFor(sortedImages)?.image_url ?? null,
+  (data || []).forEach((product) => {
+    const allImages = product.product_images || [];
+    const colours = product.product_colours || [];
+
+    const makeCard = (colourId, images) => {
+      const sortedImages = [...images].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      return {
+        id: product.id,
+        colourId,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        gender: product.gender ?? 'unisex',
+        brand: product.brands?.name ?? '',
+        brandSlug: product.brands?.slug ?? '',
+        image: sortedImages[0]?.image_url ?? null,
+        altImage: altImageFor(sortedImages)?.image_url ?? null,
+      };
     };
+
+    const shouldSplitByColour = colours.length > 1 && !MERGE_COLOURS_FOR_SLUGS.has(product.slug);
+
+    if (!shouldSplitByColour) {
+      if (allImages.length === 0) return;
+      cards.push(makeCard(null, allImages));
+      return;
+    }
+
+    colours.forEach((colour) => {
+      const imagesForColour = allImages.filter((image) => image.colour_id === colour.id);
+      if (imagesForColour.length === 0) return;
+      cards.push(makeCard(colour.id, imagesForColour));
+    });
   });
+
+  return cards;
 };
 
 export const fetchProductBySlug = async (slug) => {
@@ -110,7 +142,7 @@ const createProductCard = (product) => {
   const card = document.createElement('a');
   const isPlaceholder = !product.image;
   card.className = `media-card media-card--photo${isPlaceholder ? ' media-card--placeholder' : ''}`;
-  card.href = `product.html?slug=${encodeURIComponent(product.slug)}`;
+  card.href = `product.html?slug=${encodeURIComponent(product.slug)}${product.colourId ? `&colour=${encodeURIComponent(product.colourId)}` : ''}`;
 
   const mediaWrap = document.createElement('div');
   mediaWrap.className = 'media-card__media';
@@ -119,18 +151,22 @@ const createProductCard = (product) => {
   const media = document.createElement('div');
   media.className = 'media-card__image';
   media.style.backgroundImage = `url("${product.image || placeholderPhotoFor(product.id)}")`;
+  media.setAttribute('role', 'img');
+  media.setAttribute('aria-label', `${product.brand} ${product.name}`.trim());
   mediaWrap.appendChild(media);
 
   if (product.altImage) {
     const altMedia = document.createElement('div');
     altMedia.className = 'media-card__image media-card__image--alt';
     altMedia.style.backgroundImage = `url("${product.altImage}")`;
+    altMedia.setAttribute('aria-hidden', 'true');
     mediaWrap.appendChild(altMedia);
   }
 
   const cta = document.createElement('span');
   cta.className = 'media-card__cta';
   cta.textContent = 'Shop Now';
+  cta.setAttribute('aria-hidden', 'true');
   mediaWrap.appendChild(cta);
 
   const meta = document.createElement('div');
@@ -167,11 +203,14 @@ const createBrandCard = (brand) => {
   const media = document.createElement('div');
   media.className = 'media-card__image';
   media.style.backgroundImage = `url("${brand.image || placeholderPhotoFor(brand.slug)}")`;
+  media.setAttribute('role', 'img');
+  media.setAttribute('aria-label', brand.name);
   mediaWrap.appendChild(media);
 
   const hoverCta = document.createElement('span');
   hoverCta.className = 'media-card__cta';
   hoverCta.textContent = 'Shop Now';
+  hoverCta.setAttribute('aria-hidden', 'true');
   mediaWrap.appendChild(hoverCta);
 
   const meta = document.createElement('div');
@@ -198,6 +237,8 @@ const createCategoryPanel = (theme, product) => {
   const media = document.createElement('div');
   media.className = 'category-panel__media';
   media.style.backgroundImage = `url("${theme.image || product?.image || placeholderPhotoFor(theme.label)}")`;
+  media.setAttribute('role', 'img');
+  media.setAttribute('aria-label', theme.label);
   panel.appendChild(media);
 
   const copy = document.createElement('div');
@@ -504,7 +545,9 @@ const renderRelatedProducts = async (currentProductId) => {
 };
 
 export const initProductPage = async () => {
-  const slug = new URLSearchParams(window.location.search).get('slug');
+  const pageParams = new URLSearchParams(window.location.search);
+  const slug = pageParams.get('slug');
+  const requestedColourId = pageParams.get('colour');
   const loadingEl = document.querySelector('[data-product-loading]');
   const notFoundEl = document.querySelector('[data-product-not-found]');
   const pageEl = document.querySelector('[data-product-page]');
@@ -529,9 +572,12 @@ export const initProductPage = async () => {
     variant.colour_id === colourId && (variant.stock_quantity > 0 || variant.is_preorder_available)
   ));
   const displayColours = colours;
+  // Arriving from a specific colourway's grid tile should land on that exact colourway, not
+  // whichever one this product would normally default to.
+  const requestedColour = requestedColourId && displayColours.find((colour) => colour.id === requestedColourId);
 
   const state = {
-    colourId: displayColours.find((colour) => isColourAvailable(colour.id))?.id ?? displayColours[0]?.id ?? null,
+    colourId: requestedColour?.id ?? displayColours.find((colour) => isColourAvailable(colour.id))?.id ?? displayColours[0]?.id ?? null,
     size: null,
     quantity: 1,
   };
@@ -575,15 +621,22 @@ export const initProductPage = async () => {
         const slide = document.createElement('div');
         slide.className = 'pdp-gallery__slide pdp-gallery__slide--placeholder';
         slide.style.backgroundImage = `url("${placeholderPhotoFor(product.id)}")`;
+        slide.setAttribute('role', 'img');
+        slide.setAttribute('aria-label', product.name);
         galleryMain.appendChild(slide);
       }
       return;
     }
 
     activeImages.forEach((image, index) => {
+      const angleLabel = image.shot_angle ? `, ${image.shot_angle} view` : ` — photo ${index + 1}`;
+      const label = `${product.name}${angleLabel}`;
+
       const slide = document.createElement('div');
       slide.className = 'pdp-gallery__slide';
       slide.style.backgroundImage = `url("${image.image_url}")`;
+      slide.setAttribute('role', 'img');
+      slide.setAttribute('aria-label', label);
       galleryMain?.appendChild(slide);
 
       const thumb = document.createElement('button');
@@ -591,6 +644,7 @@ export const initProductPage = async () => {
       thumb.className = `pdp-gallery__thumb ${index === 0 ? 'is-active' : ''}`;
       thumb.style.backgroundImage = `url("${image.image_url}")`;
       thumb.dataset.index = String(index);
+      thumb.setAttribute('aria-label', `View ${label}`);
       galleryThumbs?.appendChild(thumb);
     });
   };

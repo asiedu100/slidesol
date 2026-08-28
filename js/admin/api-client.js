@@ -49,6 +49,7 @@ export const deleteImage = (id) => request('admin-catalogue', `/images/${id}`, {
 export const listOrders = (customerId) => request('admin-orders', customerId ? `/orders?customer_id=${encodeURIComponent(customerId)}` : '/orders');
 export const getOrder = (id) => request('admin-orders', `/orders/${id}`);
 export const updateOrderStatus = (id, orderStatus) => request('admin-orders', `/orders/${id}`, { method: 'PATCH', body: { order_status: orderStatus } });
+export const refundOrder = (id) => request('admin-orders', `/orders/${id}/refund`, { method: 'POST', body: {} });
 
 // Customers
 export const listCustomers = () => request('admin-orders', '/customers');

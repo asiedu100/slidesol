@@ -35,16 +35,22 @@ export const getDeliveryFee = (fulfilmentMethod: string, region: string | null):
 
 export const CURRENCY = 'GHS';
 
+// Matches the live database's payments.status CHECK constraint, which also allows
+// 'abandoned' — not yet surfaced anywhere in the app, so left out here until it's used.
 export const PAYMENT_STATUS = {
   PENDING: 'pending',
   SUCCESS: 'success',
   FAILED: 'failed',
+  REFUNDED: 'refunded',
 } as const;
 
+// Matches the live database's orders.payment_status CHECK constraint, which also allows
+// 'cancelled' — not yet surfaced anywhere in the app, so left out here until it's used.
 export const ORDER_PAYMENT_STATUS = {
   PENDING: 'pending',
   PAID: 'paid',
   FAILED: 'failed',
+  REFUNDED: 'refunded',
 } as const;
 
 // PENDING/PROCESSING are set automatically by create-order/the webhook. The rest are the

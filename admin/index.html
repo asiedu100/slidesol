@@ -35,11 +35,11 @@
     <aside class="admin-sidebar">
       <p class="admin-sidebar__logo">SLIDESOL <span>Studio</span></p>
       <nav class="admin-nav">
-        <a href="index.html" aria-current="page">Dashboard</a>
-        <a href="products.html">Products</a>
-        <a href="brands.html">Brands</a>
-        <a href="orders.html">Orders</a>
-        <a href="customers.html">Customers</a>
+        <a href="index.html" aria-current="page"><svg class="admin-nav__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></a>
+        <a href="products.html"><svg class="admin-nav__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20.59 13.41-7.17 7.17a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/><circle cx="7.5" cy="7.5" r="1"/></svg><span>Products</span></a>
+        <a href="brands.html"><svg class="admin-nav__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Brands</span></a>
+        <a href="orders.html"><svg class="admin-nav__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Orders</span></a>
+        <a href="customers.html"><svg class="admin-nav__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Customers</span></a>
       </nav>
       <div class="admin-sidebar__foot">
         <p data-admin-name></p>
@@ -56,20 +56,34 @@
       <p class="admin-alert admin-alert--error" data-admin-error hidden></p>
 
       <div class="admin-stat-grid">
-        <div class="admin-stat"><p>Products</p><p data-stat-products>—</p></div>
-        <div class="admin-stat"><p>Brands</p><p data-stat-brands>—</p></div>
-        <div class="admin-stat"><p>Orders</p><p data-stat-orders>—</p></div>
-        <div class="admin-stat"><p>Customers</p><p data-stat-customers>—</p></div>
+        <div class="admin-stat">
+          <div class="admin-stat__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20.59 13.41-7.17 7.17a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/><circle cx="7.5" cy="7.5" r="1"/></svg></div>
+          <div class="admin-stat__body"><p>Products</p><p data-stat-products>—</p></div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          <div class="admin-stat__body"><p>Brands</p><p data-stat-brands>—</p></div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+          <div class="admin-stat__body"><p>Orders</p><p data-stat-orders>—</p></div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="admin-stat__body"><p>Customers</p><p data-stat-customers>—</p></div>
+        </div>
       </div>
 
       <div class="admin-card">
         <h2>Recent Orders</h2>
-        <table class="admin-table">
-          <thead>
-            <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Payment</th></tr>
-          </thead>
-          <tbody data-recent-orders></tbody>
-        </table>
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Payment</th></tr>
+            </thead>
+            <tbody data-recent-orders></tbody>
+          </table>
+        </div>
         <p class="admin-empty" data-recent-orders-empty hidden>No orders yet.</p>
       </div>
 

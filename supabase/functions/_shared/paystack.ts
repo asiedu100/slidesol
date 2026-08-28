@@ -91,3 +91,35 @@ export const verifyTransaction = async (reference: string): Promise<VerifyTransa
     return { ok: false, errorMessage: error instanceof Error ? error.message : 'Network error calling Paystack' };
   }
 };
+
+export interface RefundTransactionResult {
+  ok: boolean;
+  status?: string;
+  refundId?: string | number;
+  errorMessage?: string;
+}
+
+// No `amount` field is sent — omitting it means Paystack refunds the full transaction.
+export const refundTransaction = async (transactionReference: string): Promise<RefundTransactionResult> => {
+  try {
+    const response = await fetch(`${PAYSTACK_BASE_URL}/refund`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ transaction: transactionReference }),
+    });
+
+    const body = await response.json();
+
+    if (!response.ok || !body?.status) {
+      return { ok: false, errorMessage: body?.message || `Paystack refund failed (${response.status})` };
+    }
+
+    return {
+      ok: true,
+      status: body.data?.status,
+      refundId: body.data?.id,
+    };
+  } catch (error) {
+    return { ok: false, errorMessage: error instanceof Error ? error.message : 'Network error calling Paystack' };
+  }
+};

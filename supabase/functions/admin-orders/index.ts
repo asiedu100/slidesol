@@ -33,6 +33,9 @@ Deno.serve(async (req) => {
         if (method === 'GET') return await orders.getOne(supabase, segments[1]);
         if (method === 'PATCH') return await orders.updateStatus(supabase, req, segments[1]);
       }
+      if (segments.length === 3 && UUID_RE.test(segments[1]) && segments[2] === 'refund' && method === 'POST') {
+        return await orders.refund(supabase, segments[1]);
+      }
     }
 
     if (segments[0] === 'customers') {
