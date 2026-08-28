@@ -592,6 +592,51 @@ const renderRelatedProducts = async (currentProductId) => {
   related.forEach((product) => container.appendChild(createProductCard(product)));
 };
 
+// Google's indexer renders the page and reads JS-injected content (unlike the static OG-tag
+// fallback above, which exists specifically because social-preview crawlers don't run JS) — so
+// injecting the canonical link and Product structured data here, once the real product has
+// loaded, is a genuine fix rather than a partial one.
+const injectProductSeoTags = (product) => {
+  const canonicalUrl = `https://slidesol.com/product.html?slug=${encodeURIComponent(product.slug)}`;
+
+  let canonicalLink = document.querySelector('link[rel="canonical"]');
+  if (!canonicalLink) {
+    canonicalLink = document.createElement('link');
+    canonicalLink.rel = 'canonical';
+    document.head.appendChild(canonicalLink);
+  }
+  canonicalLink.href = canonicalUrl;
+
+  const images = product.product_images || [];
+  const imageUrls = [...new Set(images.map((image) => image.image_url))];
+  const variants = (product.product_variants || []).filter((variant) => variant.is_active);
+  const inStock = variants.some((variant) => variant.stock_quantity > 0 || variant.is_preorder_available);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `${product.brands?.name ?? ''} ${product.name}`.trim(),
+    image: imageUrls,
+    brand: { '@type': 'Brand', name: product.brands?.name ?? 'SLIDESOL' },
+    offers: {
+      '@type': 'Offer',
+      url: canonicalUrl,
+      priceCurrency: 'GHS',
+      price: String(product.price),
+      availability: `https://schema.org/${inStock ? 'InStock' : 'OutOfStock'}`,
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  };
+
+  document.querySelector('script[data-product-jsonld]')?.remove();
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.dataset.productJsonld = 'true';
+  script.textContent = JSON.stringify(jsonLd);
+  document.head.appendChild(script);
+};
+
 export const initProductPage = async () => {
   const pageParams = new URLSearchParams(window.location.search);
   const slug = pageParams.get('slug');
@@ -610,6 +655,7 @@ export const initProductPage = async () => {
 
   if (pageEl) pageEl.hidden = false;
   document.title = `${product.name} — SLIDESOL`;
+  injectProductSeoTags(product);
 
   const colours = product.product_colours || [];
   const variants = (product.product_variants || []).filter((variant) => variant.is_active);
