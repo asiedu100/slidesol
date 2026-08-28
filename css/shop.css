@@ -99,6 +99,19 @@
   padding: 0;
 }
 
+.filter-panel__brand-search {
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  width: 100%;
+  max-width: 240px;
+  margin-bottom: var(--space-1);
+}
+
 .brand-pill {
   font-size: var(--text-small);
   padding: var(--space-1) var(--space-3);

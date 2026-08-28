@@ -3,9 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout — SLIDESOL</title>
-  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
-  <meta name="robots" content="noindex">
+  <title>Terms &amp; Conditions — SLIDESOL</title>
+  <meta name="description" content="Terms and conditions for shopping at SLIDESOL.">
+  <link rel="canonical" href="https://slidesol.com/terms.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SLIDESOL">
+  <meta property="og:title" content="Terms &amp; Conditions — SLIDESOL">
+  <meta property="og:description" content="Terms and conditions for shopping at SLIDESOL.">
+  <meta property="og:url" content="https://slidesol.com/terms.html">
+  <meta property="og:image" content="https://slidesol.com/assets/og/og-default.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Terms &amp; Conditions — SLIDESOL">
+  <meta name="twitter:description" content="Terms and conditions for shopping at SLIDESOL.">
+  <meta name="twitter:image" content="https://slidesol.com/assets/og/og-default.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -13,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/content-page.css">
 </head>
 <body>
   <header class="site-header is-solid">
@@ -69,97 +81,44 @@
   </div>
 
   <main>
-    <div class="checkout-head container">
-      <p class="eyebrow">Checkout</p>
-      <h1>Complete Your Order</h1>
-    </div>
+    <section class="content-page">
+      <div class="container section-head">
+        <p class="eyebrow">Legal</p>
+        <h1>Terms &amp; Conditions</h1>
+        <p class="content-page__intro">Last updated 28 August 2026. By using slidesol.com or placing an order, you agree to the terms below.</p>
+      </div>
 
-    <p class="checkout-empty container" data-checkout-empty hidden>
-      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
-    </p>
+      <div class="container content-page__body">
+        <p class="content-page__legal-note">This is a general template written for how SLIDESOL currently operates — it isn't a substitute for a lawyer's review, and should be checked against Ghanaian consumer-protection law before being treated as final.</p>
 
-    <div class="checkout container" data-checkout-form-section hidden>
-      <form class="checkout-form" data-checkout-form novalidate>
-        <fieldset class="checkout-fieldset">
-          <legend>Contact</legend>
-          <div class="form-field">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
-            </div>
-            <div class="form-field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
-            </div>
-          </div>
-        </fieldset>
+        <h2>1. Orders &amp; pricing</h2>
+        <p>Prices are shown in Ghana Cedis (GH₵) and include product cost only — delivery fees are added at checkout based on fulfilment method and region, and shown in full before you pay. We reserve the right to correct pricing errors and to cancel an order placed at an incorrect price, with a full refund.</p>
 
-        <fieldset class="checkout-fieldset">
-          <legend>Fulfilment</legend>
-          <div class="fulfilment-options">
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="delivery" checked>
-              Delivery
-            </label>
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="pickup">
-              Pickup
-            </label>
-          </div>
+        <h2>2. Payment</h2>
+        <p>Payments are processed by Paystack. We never see or store your card or mobile money details directly. An order is only confirmed once payment has been verified.</p>
 
-          <div data-delivery-fields>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="region">Region</label>
-                <select id="region" name="region" data-region-select required>
-                  <option value="" disabled selected>Select region</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" maxlength="100" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="area">Area</label>
-                <input type="text" id="area" name="area" maxlength="100" required>
-              </div>
-              <div class="form-field">
-                <label for="address">Detailed Address</label>
-                <input type="text" id="address" name="address" maxlength="500" required>
-              </div>
-            </div>
-          </div>
-        </fieldset>
+        <h2>3. Delivery &amp; pickup</h2>
+        <p>Delivery is available across Ghana; the fee depends on your region and is calculated at checkout. Free pickup is available at our Kumasi and Accra locations — see <a href="contact.html">Contact</a> for addresses and hours. Delivery timeframes are estimates, not guarantees.</p>
 
-        <fieldset class="checkout-fieldset">
-          <legend>Order Note</legend>
-          <div class="form-field">
-            <label for="customer_note">Anything we should know? (optional)</label>
-            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
-          </div>
-        </fieldset>
+        <h2>4. Returns, exchanges &amp; refunds</h2>
+        <p>Contact us within 48 hours of receiving your order if it's the wrong size or item, or arrives faulty. Items must be unworn, in original packaging. Approved refunds are returned to your original payment method through Paystack. We don't accept returns for change of mind on worn items.</p>
 
-        <p class="checkout-error" data-checkout-error hidden></p>
+        <h2>5. Product authenticity</h2>
+        <p>All products listed are genuine stock from the brands shown. Photography is of the actual item — minor colour variation between photo and screen is possible depending on your display.</p>
 
-        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
-      </form>
+        <h2>6. Availability</h2>
+        <p>Stock levels shown on the site are kept as accurate as possible but aren't a guarantee — in the rare case an item sells out before your order is confirmed, we'll contact you with a refund or alternative.</p>
 
-      <aside class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div data-checkout-items></div>
-        <div class="checkout-totals">
-          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
-          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
-          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
-        </div>
-      </aside>
-    </div>
+        <h2>7. Limitation of liability</h2>
+        <p>SLIDESOL is not liable for indirect or consequential loss arising from use of the site or a delayed delivery beyond our control (e.g. courier delays, incorrect address supplied at checkout).</p>
+
+        <h2>8. Governing law</h2>
+        <p>These terms are governed by the laws of Ghana.</p>
+
+        <h2>9. Contact</h2>
+        <p>Questions about these terms: <a href="mailto:info@slidesol.com">info@slidesol.com</a> or <a href="https://wa.me/233549436004" target="_blank" rel="noopener">WhatsApp</a>.</p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -195,7 +154,6 @@
     import { initHeaderScrollState, initMobileNav } from './js/motion.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
-    import { initCheckoutPage } from './js/store/checkout.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
@@ -203,7 +161,6 @@
     initCartBadge();
     initWishlistBadge();
     initCartDrawer();
-    initCheckoutPage();
   </script>
 
   <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">

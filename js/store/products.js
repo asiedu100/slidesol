@@ -2,6 +2,32 @@ import { supabase } from '../supabase.js';
 import { formatMoney } from '../config.js';
 import { addToCart } from './cart.js';
 import { placeholderPhotoFor } from './placeholder-photos.js';
+import { keyFor, isWishlisted, toggleWishlist, getWishlist } from './wishlist.js';
+
+const HEART_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>';
+
+// Shared by every product-card-with-heart across the site — builds the toggle button and
+// wires it to wishlist.js, without ever letting the click bubble into the card's own link.
+const createWishlistToggle = (item) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'wishlist-toggle';
+  button.innerHTML = HEART_ICON;
+  button.setAttribute('aria-label', 'Save to wishlist');
+  button.setAttribute('aria-pressed', String(isWishlisted(item.key)));
+  button.classList.toggle('is-active', isWishlisted(item.key));
+
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const nowSaved = toggleWishlist(item);
+    button.classList.toggle('is-active', nowSaved);
+    button.setAttribute('aria-pressed', String(nowSaved));
+    button.setAttribute('aria-label', nowSaved ? 'Remove from wishlist' : 'Save to wishlist');
+  });
+
+  return button;
+};
 
 const CATEGORY_THEMES = [
   { label: 'Slides', description: 'The everyday slide, done properly.', preferredBrandName: null, image: 's5.jpeg' },
@@ -168,6 +194,17 @@ const createProductCard = (product) => {
   cta.textContent = 'Shop Now';
   cta.setAttribute('aria-hidden', 'true');
   mediaWrap.appendChild(cta);
+
+  mediaWrap.appendChild(createWishlistToggle({
+    key: keyFor(product.id, product.colourId),
+    productId: product.id,
+    colourId: product.colourId ?? null,
+    slug: product.slug,
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    image: product.image,
+  }));
 
   const meta = document.createElement('div');
   meta.className = 'media-card__meta';
@@ -411,6 +448,7 @@ export const initShopPage = async () => {
   const statusEl = document.querySelector('[data-shop-status]');
   const brandContainer = document.querySelector('[data-brand-filters]');
   const genderContainer = document.querySelector('[data-gender-filters]');
+  const brandSearchInput = document.querySelector('[data-brand-search]');
   const searchInput = document.querySelector('[data-search-input]');
   const sortSelect = document.querySelector('[data-sort-select]');
   const filterPanel = document.querySelector('[data-filter-panel]');
@@ -437,6 +475,16 @@ export const initShopPage = async () => {
       brandContainer.appendChild(pill);
     });
   }
+
+  // Filters the brand PILLS themselves (not the product grid) — a growing brand list gets
+  // hard to scan by eye alone, so typing narrows which pills show. "All" always stays put.
+  brandSearchInput?.addEventListener('input', () => {
+    const q = brandSearchInput.value.trim().toLowerCase();
+    brandContainer?.querySelectorAll('.brand-pill').forEach((pill) => {
+      const isAll = pill.dataset.brand === '';
+      pill.hidden = !isAll && q.length > 0 && !pill.textContent.toLowerCase().includes(q);
+    });
+  });
 
   if (genderContainer) {
     const allPill = document.createElement('button');
@@ -594,6 +642,7 @@ export const initProductPage = async () => {
   const addButton = document.querySelector('[data-add-to-cart]');
   const stockNote = document.querySelector('[data-stock-note]');
   const qtyValue = document.querySelector('[data-qty-value]');
+  const wishlistButton = document.querySelector('[data-wishlist-toggle]');
 
   if (brandEl) brandEl.textContent = product.brands?.name ?? '';
   if (nameEl) nameEl.textContent = product.name;
@@ -735,12 +784,42 @@ export const initProductPage = async () => {
     if (qtyValue) qtyValue.textContent = '1';
   };
 
+  // Saved at the currently-selected colour, not the product as a whole — matches how the
+  // shop grid already treats each colourway as its own tile.
+  const wishlistItemForCurrentColour = () => {
+    const colourName = displayColours.find((colour) => colour.id === state.colourId)?.name ?? null;
+    return {
+      key: keyFor(product.id, state.colourId),
+      productId: product.id,
+      colourId: state.colourId,
+      slug: product.slug,
+      name: colourName ? `${product.name} (${colourName})` : product.name,
+      brand: product.brands?.name ?? '',
+      price: product.price,
+      image: activeImages[0]?.image_url ?? null,
+    };
+  };
+
+  const updateWishlistButton = () => {
+    if (!wishlistButton) return;
+    const saved = isWishlisted(keyFor(product.id, state.colourId));
+    wishlistButton.classList.toggle('is-active', saved);
+    wishlistButton.setAttribute('aria-pressed', String(saved));
+    wishlistButton.setAttribute('aria-label', saved ? 'Remove from wishlist' : 'Save to wishlist');
+  };
+
+  wishlistButton?.addEventListener('click', () => {
+    toggleWishlist(wishlistItemForCurrentColour());
+    updateWishlistButton();
+  });
+
   const renderAll = () => {
     renderGallery();
     renderSwatches();
     renderSizes();
     resetQuantity();
     updateAddState();
+    updateWishlistButton();
   };
 
   swatchContainer?.addEventListener('click', (event) => {
@@ -808,4 +887,45 @@ export const initProductPage = async () => {
 
   renderAll();
   renderRelatedProducts(product.id);
+};
+
+// ==========================================================================
+// Wishlist page — wishlist.html. Items are already fully denormalized in
+// localStorage (see wishlist.js), so this needs no network fetch at all —
+// what's shown is exactly what was saved, price included.
+// ==========================================================================
+
+export const initWishlistPage = () => {
+  const grid = document.querySelector('[data-wishlist-grid]');
+  const empty = document.querySelector('[data-wishlist-empty]');
+  if (!grid) return;
+
+  const render = () => {
+    const items = getWishlist();
+    grid.innerHTML = '';
+
+    if (items.length === 0) {
+      grid.hidden = true;
+      if (empty) empty.hidden = false;
+      return;
+    }
+
+    grid.hidden = false;
+    if (empty) empty.hidden = true;
+
+    items.forEach((item) => {
+      grid.appendChild(createProductCard({
+        id: item.productId,
+        slug: item.slug,
+        colourId: item.colourId,
+        name: item.name,
+        brand: item.brand,
+        price: item.price,
+        image: item.image,
+      }));
+    });
+  };
+
+  render();
+  window.addEventListener('slidesol:wishlist-updated', render);
 };

@@ -595,6 +595,57 @@ h1, h2, h3 {
 
 .media-card:hover .media-card__cta { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
 
+/* ==========================================================================
+   Wishlist — a heart toggle sitting on any media-card, plus its header link.
+   ========================================================================== */
+
+.wishlist-toggle {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-paper) 85%, transparent);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-premium), color 0.2s var(--ease-premium), background-color 0.2s var(--ease-premium);
+}
+
+.wishlist-toggle svg { fill: none; transition: fill 0.2s var(--ease-premium); }
+.wishlist-toggle:hover { transform: scale(1.08); background: var(--color-paper); }
+.wishlist-toggle.is-active { color: var(--color-rust); }
+.wishlist-toggle.is-active svg { fill: currentColor; }
+
+.wishlist-header-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+}
+
+.wishlist-header-link__count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-clay);
+  color: var(--color-paper);
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
 .media-card__meta {
   padding-block: var(--space-2) 0;
   color: var(--color-ink);

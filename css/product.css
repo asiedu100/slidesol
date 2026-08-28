@@ -106,7 +106,21 @@
   cursor: pointer;
 }
 
-.pdp__add { width: 100%; margin-top: var(--space-2); padding-block: var(--space-2); }
+.pdp__add-row { display: flex; gap: var(--space-1); align-items: stretch; margin-top: var(--space-2); }
+.pdp__add { flex: 1; width: auto; margin-top: 0; padding-block: var(--space-2); }
+
+.wishlist-toggle--pdp {
+  position: static;
+  flex-shrink: 0;
+  width: 48px;
+  height: auto;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+  background: transparent;
+}
+
+.wishlist-toggle--pdp:hover { background: var(--color-stone); transform: none; }
+
 .pdp__stock-note { font-size: var(--text-small); color: var(--color-clay); min-height: 1.2em; margin: var(--space-1) 0 0; }
 
 .pdp__delivery {

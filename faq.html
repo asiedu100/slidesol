@@ -3,9 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout — SLIDESOL</title>
-  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
-  <meta name="robots" content="noindex">
+  <title>FAQs — SLIDESOL</title>
+  <meta name="description" content="Answers to common questions about sizing, delivery, pickup, payment and returns at SLIDESOL.">
+  <link rel="canonical" href="https://slidesol.com/faq.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SLIDESOL">
+  <meta property="og:title" content="FAQs — SLIDESOL">
+  <meta property="og:description" content="Answers to common questions about sizing, delivery, pickup, payment and returns at SLIDESOL.">
+  <meta property="og:url" content="https://slidesol.com/faq.html">
+  <meta property="og:image" content="https://slidesol.com/assets/og/og-default.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FAQs — SLIDESOL">
+  <meta name="twitter:description" content="Answers to common questions about sizing, delivery, pickup, payment and returns at SLIDESOL.">
+  <meta name="twitter:image" content="https://slidesol.com/assets/og/og-default.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -13,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/content-page.css">
 </head>
 <body>
   <header class="site-header is-solid">
@@ -69,97 +81,46 @@
   </div>
 
   <main>
-    <div class="checkout-head container">
-      <p class="eyebrow">Checkout</p>
-      <h1>Complete Your Order</h1>
-    </div>
+    <section class="content-page">
+      <div class="container section-head">
+        <p class="eyebrow">Help</p>
+        <h1>Frequently Asked Questions</h1>
+        <p class="content-page__intro">Can't find what you're after? Reach us on <a href="https://wa.me/233549436004" target="_blank" rel="noopener">WhatsApp</a> or at <a href="mailto:info@slidesol.com">info@slidesol.com</a>.</p>
+      </div>
 
-    <p class="checkout-empty container" data-checkout-empty hidden>
-      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
-    </p>
-
-    <div class="checkout container" data-checkout-form-section hidden>
-      <form class="checkout-form" data-checkout-form novalidate>
-        <fieldset class="checkout-fieldset">
-          <legend>Contact</legend>
-          <div class="form-field">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
-            </div>
-            <div class="form-field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Fulfilment</legend>
-          <div class="fulfilment-options">
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="delivery" checked>
-              Delivery
-            </label>
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="pickup">
-              Pickup
-            </label>
-          </div>
-
-          <div data-delivery-fields>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="region">Region</label>
-                <select id="region" name="region" data-region-select required>
-                  <option value="" disabled selected>Select region</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" maxlength="100" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="area">Area</label>
-                <input type="text" id="area" name="area" maxlength="100" required>
-              </div>
-              <div class="form-field">
-                <label for="address">Detailed Address</label>
-                <input type="text" id="address" name="address" maxlength="500" required>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Order Note</legend>
-          <div class="form-field">
-            <label for="customer_note">Anything we should know? (optional)</label>
-            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
-          </div>
-        </fieldset>
-
-        <p class="checkout-error" data-checkout-error hidden></p>
-
-        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
-      </form>
-
-      <aside class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div data-checkout-items></div>
-        <div class="checkout-totals">
-          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
-          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
-          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
+      <div class="container">
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>How do I know what size to order?</summary>
+            <p>Sizes on each product page are as listed by the brand. If you're unsure how a brand fits, check our <a href="size-guide.html">Size Guide</a> for EU/UK/US conversions, or message us the brand and your usual size and we'll advise.</p>
+          </details>
+          <details class="faq-item">
+            <summary>What payment methods do you accept?</summary>
+            <p>All payments are processed securely through Paystack, which supports major cards and mobile money. SLIDESOL never sees or stores your card details.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Do you deliver outside Kumasi and Accra?</summary>
+            <p>Yes — delivery is available across Ghana, with the fee depending on your region. Choose "Delivery" at checkout and select your region to see the exact fee before you pay.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Can I pick up my order instead of paying for delivery?</summary>
+            <p>Yes — free pickup is available at our Kumasi and Accra locations. Choose "Pickup" at checkout. See <a href="contact.html">Contact</a> for addresses and hours.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Are your products authentic?</summary>
+            <p>Yes. Every listing is shot from the actual pair we carry — not a stock photo — and we work only with genuine stock from the brands listed.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Can I change or cancel my order after placing it?</summary>
+            <p>Message us as soon as possible on WhatsApp or email — if your order hasn't been processed yet, we can usually amend or cancel it.</p>
+          </details>
+          <details class="faq-item">
+            <summary>What's your return policy?</summary>
+            <p>Get in touch within 48 hours of receiving your order if something isn't right — wrong size, wrong item, or a fault — and we'll sort out an exchange or refund. See our <a href="terms.html">Terms &amp; Conditions</a> for the full policy.</p>
+          </details>
         </div>
-      </aside>
-    </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -195,7 +156,6 @@
     import { initHeaderScrollState, initMobileNav } from './js/motion.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
-    import { initCheckoutPage } from './js/store/checkout.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
@@ -203,7 +163,6 @@
     initCartBadge();
     initWishlistBadge();
     initCartDrawer();
-    initCheckoutPage();
   </script>
 
   <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">

@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Content pages — About, Terms, FAQ, Size Guide. Plain prose/reference pages,
+   sharing the site's tokens but with no editorial/product treatment needed.
+   ========================================================================== */
+
+.content-page { padding-block: var(--space-6) var(--space-7); }
+
+.content-page__intro {
+  max-width: 640px;
+  font-size: 1.125rem;
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.content-page__body {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.content-page__body h2 {
+  font-size: var(--text-h3);
+  margin-top: var(--space-4);
+}
+
+.content-page__body h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-1);
+}
+
+.content-page__body p { margin: 0; }
+.content-page__body ul, .content-page__body ol { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--space-1); }
+
+.content-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .content-page__grid { grid-template-columns: 1fr; }
+}
+
+.content-page__grid article p { color: var(--color-muted); margin-top: var(--space-1); }
+
+/* Terms/legal-style numbered sections */
+.content-page__legal-note {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+  border-left: 2px solid var(--color-clay);
+  padding-left: var(--space-2);
+}
+
+/* FAQ — native <details>/<summary>, no JS needed */
+.faq-list {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.faq-item {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+  padding-block: var(--space-2);
+}
+
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.faq-item summary::-webkit-details-marker { display: none; }
+
+.faq-item summary::after {
+  content: '+';
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-clay);
+  transition: transform 0.3s var(--ease-premium);
+}
+
+.faq-item[open] summary::after { transform: rotate(45deg); }
+
+.faq-item p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-muted);
+  max-width: 640px;
+}
+
+/* Size guide table */
+.size-guide-table-wrap { overflow-x: auto; max-width: 720px; }
+
+.size-guide-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.size-guide-table th, .size-guide-table td {
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+}
+
+.size-guide-table th {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}

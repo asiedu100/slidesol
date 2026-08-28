@@ -3,9 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout — SLIDESOL</title>
-  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
-  <meta name="robots" content="noindex">
+  <title>Size Guide — SLIDESOL</title>
+  <meta name="description" content="EU, UK and US size conversions for footwear at SLIDESOL.">
+  <link rel="canonical" href="https://slidesol.com/size-guide.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SLIDESOL">
+  <meta property="og:title" content="Size Guide — SLIDESOL">
+  <meta property="og:description" content="EU, UK and US size conversions for footwear at SLIDESOL.">
+  <meta property="og:url" content="https://slidesol.com/size-guide.html">
+  <meta property="og:image" content="https://slidesol.com/assets/og/og-default.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Size Guide — SLIDESOL">
+  <meta name="twitter:description" content="EU, UK and US size conversions for footwear at SLIDESOL.">
+  <meta name="twitter:image" content="https://slidesol.com/assets/og/og-default.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -13,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/content-page.css">
 </head>
 <body>
   <header class="site-header is-solid">
@@ -69,97 +81,45 @@
   </div>
 
   <main>
-    <div class="checkout-head container">
-      <p class="eyebrow">Checkout</p>
-      <h1>Complete Your Order</h1>
-    </div>
+    <section class="content-page">
+      <div class="container section-head">
+        <p class="eyebrow">Help</p>
+        <h1>Size Guide</h1>
+        <p class="content-page__intro">Sizes on each product page are listed exactly as the brand sizes them. Use this chart as a general EU/UK/US reference — exact fit still varies a little by brand and style, so when you're between sizes on a sandal or slide, sizing up is usually the safer call.</p>
+      </div>
 
-    <p class="checkout-empty container" data-checkout-empty hidden>
-      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
-    </p>
-
-    <div class="checkout container" data-checkout-form-section hidden>
-      <form class="checkout-form" data-checkout-form novalidate>
-        <fieldset class="checkout-fieldset">
-          <legend>Contact</legend>
-          <div class="form-field">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
-            </div>
-            <div class="form-field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Fulfilment</legend>
-          <div class="fulfilment-options">
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="delivery" checked>
-              Delivery
-            </label>
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="pickup">
-              Pickup
-            </label>
-          </div>
-
-          <div data-delivery-fields>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="region">Region</label>
-                <select id="region" name="region" data-region-select required>
-                  <option value="" disabled selected>Select region</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" maxlength="100" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="area">Area</label>
-                <input type="text" id="area" name="area" maxlength="100" required>
-              </div>
-              <div class="form-field">
-                <label for="address">Detailed Address</label>
-                <input type="text" id="address" name="address" maxlength="500" required>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Order Note</legend>
-          <div class="form-field">
-            <label for="customer_note">Anything we should know? (optional)</label>
-            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
-          </div>
-        </fieldset>
-
-        <p class="checkout-error" data-checkout-error hidden></p>
-
-        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
-      </form>
-
-      <aside class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div data-checkout-items></div>
-        <div class="checkout-totals">
-          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
-          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
-          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
+      <div class="container content-page__body">
+        <div class="size-guide-table-wrap">
+          <table class="size-guide-table">
+            <thead>
+              <tr><th>EU</th><th>UK</th><th>US Women's</th><th>US Men's</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>35</td><td>2.5</td><td>5</td><td>3</td></tr>
+              <tr><td>36</td><td>3.5</td><td>6</td><td>4</td></tr>
+              <tr><td>37</td><td>4</td><td>6.5</td><td>4.5</td></tr>
+              <tr><td>38</td><td>5</td><td>7.5</td><td>5.5</td></tr>
+              <tr><td>39</td><td>5.5</td><td>8</td><td>6</td></tr>
+              <tr><td>40</td><td>6.5</td><td>9</td><td>7</td></tr>
+              <tr><td>41</td><td>7</td><td>9.5</td><td>7.5</td></tr>
+              <tr><td>42</td><td>8</td><td>10.5</td><td>8.5</td></tr>
+              <tr><td>43</td><td>9</td><td>11.5</td><td>9.5</td></tr>
+              <tr><td>44</td><td>9.5</td><td>12</td><td>10</td></tr>
+              <tr><td>45</td><td>10.5</td><td>13</td><td>11</td></tr>
+              <tr><td>46</td><td>11</td><td>13.5</td><td>11.5</td></tr>
+            </tbody>
+          </table>
         </div>
-      </aside>
-    </div>
+
+        <h2>How to measure at home</h2>
+        <ol>
+          <li>Stand on a sheet of paper against a wall, heel touching the wall.</li>
+          <li>Mark the tip of your longest toe, then measure the distance from the wall to the mark in centimetres.</li>
+          <li>Measure both feet — most people have one slightly larger foot — and size to the larger measurement.</li>
+        </ol>
+        <p>Still unsure? Send us the brand and your usual size on <a href="https://wa.me/233549436004" target="_blank" rel="noopener">WhatsApp</a> and we'll help you pick.</p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -195,7 +155,6 @@
     import { initHeaderScrollState, initMobileNav } from './js/motion.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
-    import { initCheckoutPage } from './js/store/checkout.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
@@ -203,7 +162,6 @@
     initCartBadge();
     initWishlistBadge();
     initCartDrawer();
-    initCheckoutPage();
   </script>
 
   <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">

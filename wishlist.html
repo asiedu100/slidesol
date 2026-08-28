@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout — SLIDESOL</title>
-  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
+  <title>Wishlist — SLIDESOL</title>
+  <meta name="description" content="Your saved slides and sandals at SLIDESOL.">
   <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://slidesol.com/wishlist.html">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -13,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/shop.css">
 </head>
 <body>
   <header class="site-header is-solid">
@@ -28,10 +29,6 @@
         <button type="button" class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
-        <a class="wishlist-header-link" href="wishlist.html" aria-label="Wishlist">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
-          <span class="wishlist-header-link__count" data-wishlist-count hidden>0</span>
-        </a>
         <a class="cart-toggle" href="#" aria-label="Cart" data-cart-toggle>Cart<span class="cart-toggle__count" data-cart-count hidden>0</span></a>
       </div>
     </div>
@@ -69,97 +66,13 @@
   </div>
 
   <main>
-    <div class="checkout-head container">
-      <p class="eyebrow">Checkout</p>
-      <h1>Complete Your Order</h1>
-    </div>
+    <section class="shop-head container">
+      <p class="eyebrow">Saved</p>
+      <h1>Your Wishlist</h1>
+    </section>
 
-    <p class="checkout-empty container" data-checkout-empty hidden>
-      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
-    </p>
-
-    <div class="checkout container" data-checkout-form-section hidden>
-      <form class="checkout-form" data-checkout-form novalidate>
-        <fieldset class="checkout-fieldset">
-          <legend>Contact</legend>
-          <div class="form-field">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
-            </div>
-            <div class="form-field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Fulfilment</legend>
-          <div class="fulfilment-options">
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="delivery" checked>
-              Delivery
-            </label>
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="pickup">
-              Pickup
-            </label>
-          </div>
-
-          <div data-delivery-fields>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="region">Region</label>
-                <select id="region" name="region" data-region-select required>
-                  <option value="" disabled selected>Select region</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" maxlength="100" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="area">Area</label>
-                <input type="text" id="area" name="area" maxlength="100" required>
-              </div>
-              <div class="form-field">
-                <label for="address">Detailed Address</label>
-                <input type="text" id="address" name="address" maxlength="500" required>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Order Note</legend>
-          <div class="form-field">
-            <label for="customer_note">Anything we should know? (optional)</label>
-            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
-          </div>
-        </fieldset>
-
-        <p class="checkout-error" data-checkout-error hidden></p>
-
-        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
-      </form>
-
-      <aside class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div data-checkout-items></div>
-        <div class="checkout-totals">
-          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
-          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
-          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
-        </div>
-      </aside>
-    </div>
+    <section class="shop-grid container" data-wishlist-grid></section>
+    <p class="shop-empty container" data-wishlist-empty hidden>Nothing saved yet — tap the heart on any product to keep it here.</p>
   </main>
 
   <footer class="site-footer">
@@ -195,15 +108,15 @@
     import { initHeaderScrollState, initMobileNav } from './js/motion.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
-    import { initCheckoutPage } from './js/store/checkout.js';
+    import { initWishlistPage } from './js/store/products.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
     initMobileNav();
     initCartBadge();
-    initWishlistBadge();
     initCartDrawer();
-    initCheckoutPage();
+    initWishlistBadge();
+    initWishlistPage();
   </script>
 
   <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">
