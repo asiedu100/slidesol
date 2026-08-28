@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shop All — SLIDESOL</title>
   <meta name="description" content="Shop premium slides, sandals and comfort footwear from OOFOS, Teva, adidas, Crocs, Nike and more at SLIDESOL.">
-  <link rel="canonical" href="https://slidesol.netlify.app/shop.html">
+  <link rel="canonical" href="https://slidesol.com/shop.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SLIDESOL">
   <meta property="og:title" content="Shop All — SLIDESOL">
   <meta property="og:description" content="Shop premium slides, sandals and comfort footwear from OOFOS, Teva, adidas, Crocs, Nike and more at SLIDESOL.">
-  <meta property="og:url" content="https://slidesol.netlify.app/shop.html">
-  <meta property="og:image" content="https://slidesol.netlify.app/assets/og/og-default.png">
+  <meta property="og:url" content="https://slidesol.com/shop.html">
+  <meta property="og:image" content="https://slidesol.com/assets/og/og-default.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Shop All — SLIDESOL">
   <meta name="twitter:description" content="Shop premium slides, sandals and comfort footwear from OOFOS, Teva, adidas, Crocs, Nike and more at SLIDESOL.">
-  <meta name="twitter:image" content="https://slidesol.netlify.app/assets/og/og-default.png">
+  <meta name="twitter:image" content="https://slidesol.com/assets/og/og-default.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -40,6 +40,10 @@
         <button type="button" class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
+        <a class="wishlist-header-link" href="wishlist.html" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+          <span class="wishlist-header-link__count" data-wishlist-count hidden>0</span>
+        </a>
         <a class="cart-toggle" href="#" aria-label="Cart" data-cart-toggle>Cart<span class="cart-toggle__count" data-cart-count hidden>0</span></a>
       </div>
     </div>
@@ -96,6 +100,7 @@
 
         <div class="filter-panel__group filter-panel__group--brands container">
           <span class="eyebrow">Brand</span>
+          <input type="search" class="filter-panel__brand-search" placeholder="Find a brand…" data-brand-search aria-label="Find a brand">
           <div class="filter-panel__brands" data-brand-filters></div>
         </div>
 
@@ -144,11 +149,14 @@
       <nav class="site-footer__col" aria-label="Help">
         <p class="site-footer__col-title">Help</p>
         <a href="contact.html">Contact</a>
+        <a href="faq.html">FAQs</a>
+        <a href="size-guide.html">Size Guide</a>
         <a href="index.html#location">Pickup &amp; Delivery</a>
       </nav>
       <nav class="site-footer__col" aria-label="Company">
         <p class="site-footer__col-title">Company</p>
-        <a href="contact.html">About</a>
+        <a href="about.html">About</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
       </nav>
     </div>
     <div class="site-footer__legal">
@@ -160,6 +168,7 @@
     import { initHeaderScrollState, initFilterPanel, initMobileNav } from './js/motion.js';
     import { initShopPage } from './js/store/products.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
+    import { initWishlistBadge } from './js/store/wishlist.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
@@ -167,6 +176,7 @@
     initMobileNav();
     initShopPage();
     initCartBadge();
+    initWishlistBadge();
     initCartDrawer();
   </script>
 

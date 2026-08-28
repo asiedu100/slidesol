@@ -73,7 +73,7 @@ Set these via the Supabase CLI (or dashboard → Edge Functions → Secrets) bef
 | Secret | Purpose |
 |---|---|
 | `PAYSTACK_SECRET_KEY` | Server-side only. Used to call Paystack's API and to verify webhook signatures. Never sent to the browser. Use `sk_test_...` until you're ready to go live. |
-| `SITE_URL` | Your deployed site's base URL (e.g. `https://slidesol.netlify.app`), used to build Paystack's `callback_url`. If unset, `create-order` still works but omits `callback_url`, so Paystack falls back to whatever default callback URL is configured in your Paystack dashboard. |
+| `SITE_URL` | Your deployed site's base URL (e.g. `https://slidesol.com`), used to build Paystack's `callback_url`. If unset, `create-order` still works but omits `callback_url`, so Paystack falls back to whatever default callback URL is configured in your Paystack dashboard. |
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_DB_URL`
 are auto-injected by Supabase into every Edge Function — you don't set these yourself.
