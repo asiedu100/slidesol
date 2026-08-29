@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Account — sign in / sign up / profile / order history
+   ========================================================================== */
+
+.account-head { padding-block: var(--space-6) var(--space-4); }
+.account-head h1 { font-size: var(--text-h2); }
+
+.account-panel {
+  max-width: 420px;
+  padding-block: 0 var(--space-7);
+}
+
+.form-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.form-field label { font-size: var(--text-small); font-weight: 600; }
+
+.form-field input {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.account-form-submit { margin-top: var(--space-1); }
+
+.account-switch {
+  margin-top: var(--space-2);
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.account-switch button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-clay);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.account-message {
+  font-size: var(--text-small);
+  padding: var(--space-2);
+  border-radius: 2px;
+}
+
+.account-message--error { color: var(--color-rust); border: 1px solid var(--color-rust); }
+.account-message--success { color: #2E7D32; border: 1px solid #2E7D32; }
+
+.account-body {
+  padding-block: 0 var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 760px;
+}
+
+.account-card {
+  background: var(--color-stone);
+  border-radius: 4px;
+  padding: var(--space-4);
+}
+
+.account-card h2 { font-size: 1.25rem; margin: 0 0 var(--space-3); }
+
+.account-orders { display: flex; flex-direction: column; gap: var(--space-1); }
+
+.account-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-paper);
+  border-radius: 2px;
+  font-size: var(--text-small);
+}
+
+.account-order-row__number { font-weight: 600; }
+.account-order-row__meta { color: var(--color-muted); }
+
+.account-empty { color: var(--color-muted); padding-block: var(--space-2); }

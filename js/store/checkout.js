@@ -1,5 +1,6 @@
 import { SUPABASE_ANON_KEY, functionUrl, formatMoney, GHANA_REGIONS, estimateDeliveryFee } from '../config.js';
 import { getCart, getCartSubtotal, clearCart } from './cart.js';
+import { getAccessToken, fetchMe } from './customer-auth.js';
 
 const buildItemsPayload = (cartItems) => cartItems.map((item) => ({
   product_id: item.productId,
@@ -83,6 +84,22 @@ export const initCheckoutPage = () => {
   regionSelect?.addEventListener('change', syncFulfilmentUI);
   syncFulfilmentUI();
 
+  // Signed-in customers get their details pre-filled (still editable) — purely a
+  // convenience, the account link that actually matters happens server-side via the
+  // session token sent below, not anything read back out of these fields.
+  (async () => {
+    const token = await getAccessToken();
+    if (!token) return;
+    const customer = await fetchMe(token);
+    if (!customer || !form) return;
+    const nameField = form.querySelector('[name="full_name"]');
+    const phoneField = form.querySelector('[name="phone"]');
+    const emailField = form.querySelector('[name="email"]');
+    if (nameField && !nameField.value) nameField.value = customer.full_name ?? '';
+    if (phoneField && !phoneField.value && !customer.phone?.startsWith('pending-')) phoneField.value = customer.phone ?? '';
+    if (emailField && !emailField.value) emailField.value = customer.email ?? '';
+  })();
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (errorEl) {
@@ -117,11 +134,17 @@ export const initCheckoutPage = () => {
     }
 
     try {
+      // A signed-in session's own token takes the Authorization slot instead of the bare
+      // anon key — this is what create-order uses server-side to attach the order to the
+      // account instead of a fresh guest customer row. Guest checkout (no session) keeps
+      // sending the anon key exactly as before; either way `apikey` is always the anon
+      // key, since that's the gateway-level key, unrelated to who's actually signed in.
+      const sessionToken = await getAccessToken();
       const response = await fetch(functionUrl('create-order'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Authorization: `Bearer ${sessionToken || SUPABASE_ANON_KEY}`,
           apikey: SUPABASE_ANON_KEY,
         },
         body: JSON.stringify(payload),

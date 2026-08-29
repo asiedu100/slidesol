@@ -1,5 +1,8 @@
 import { formatMoney } from '../config.js';
 import { placeholderPhotoFor } from './placeholder-photos.js';
+import { supabase } from '../supabase.js';
+import { isSignedIn } from './customer-auth.js';
+import { getServerCart, putServerCart } from './account-api.js';
 
 const CART_KEY = 'slidesol-cart';
 const CART_EVENT = 'slidesol:cart-updated';
@@ -15,16 +18,79 @@ const readCart = () => {
   }
 };
 
-const writeCart = (items) => {
+const maxQuantityFor = (item) => (item.isPreorder ? 10 : item.stock);
+
+// Best-effort, fire-and-forget — a saved cart is a convenience, never something that
+// should block or fail an actual cart interaction if the network hiccups.
+const pushToServerIfSignedIn = (items) => {
+  isSignedIn().then((signedIn) => {
+    if (!signedIn) return;
+    putServerCart(items.map((item) => ({ variant_id: item.variantId, quantity: item.quantity })))
+      .catch((error) => console.error('Failed to sync cart to server', error));
+  });
+};
+
+const writeCart = (items, { sync = true } = {}) => {
   try {
     window.localStorage.setItem(CART_KEY, JSON.stringify(items));
   } catch (error) {
     console.error('Failed to save cart', error);
   }
   window.dispatchEvent(new CustomEvent(CART_EVENT));
+  if (sync) pushToServerIfSignedIn(items);
 };
 
-const maxQuantityFor = (item) => (item.isPreorder ? 10 : item.stock);
+// Runs once per page, the moment a session is present (covers both "was already signed
+// in" on page load and a fresh sign-in on this same page) — merges whatever's saved on
+// the account with whatever's in this browser's local cart, so neither side silently
+// loses items. sync:false on the two non-merge branches since there's nothing new to
+// push back up in those cases.
+const mergeCartsOnSignIn = async () => {
+  let serverItems;
+  try {
+    ({ items: serverItems } = await getServerCart());
+  } catch (error) {
+    console.error('Failed to load saved cart', error);
+    return;
+  }
+
+  const localItems = readCart();
+  if (serverItems.length === 0 && localItems.length === 0) return;
+
+  if (serverItems.length > 0 && localItems.length === 0) {
+    writeCart(serverItems, { sync: false });
+    return;
+  }
+
+  if (serverItems.length === 0 && localItems.length > 0) {
+    writeCart(localItems);
+    return;
+  }
+
+  const merged = serverItems.map((item) => ({ ...item }));
+  localItems.forEach((localItem) => {
+    const existing = merged.find((item) => item.variantId === localItem.variantId);
+    if (existing) {
+      existing.quantity = Math.max(1, Math.min(existing.quantity + localItem.quantity, maxQuantityFor(existing)));
+    } else {
+      merged.push(localItem);
+    }
+  });
+
+  writeCart(merged);
+};
+
+// INITIAL_SESSION fires on every page load regardless of whether anyone's actually
+// signed in — it's "here's your starting state," not "you have a session." The
+// `session` argument (not the event name alone) is what actually tells the two apart.
+let hasSyncedThisSession = false;
+supabase.auth.onAuthStateChange((event, session) => {
+  if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !hasSyncedThisSession) {
+    hasSyncedThisSession = true;
+    mergeCartsOnSignIn();
+  }
+  if (event === 'SIGNED_OUT') hasSyncedThisSession = false;
+});
 
 export const getCart = () => readCart();
 

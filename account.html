@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout — SLIDESOL</title>
-  <meta name="description" content="Complete your SLIDESOL order — guest checkout, delivery or pickup.">
+  <title>Account — SLIDESOL</title>
+  <meta name="description" content="Sign in to your SLIDESOL account.">
   <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://slidesol.com/account.html">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/favicon-180.png">
@@ -13,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/account.css">
 </head>
 <body>
   <header class="site-header is-solid">
@@ -72,96 +73,102 @@
   </div>
 
   <main>
-    <div class="checkout-head container">
-      <p class="eyebrow">Checkout</p>
-      <h1>Complete Your Order</h1>
-    </div>
+    <section class="account-head container">
+      <p class="eyebrow">Account</p>
+      <h1 data-account-title>Your Account</h1>
+    </section>
 
-    <p class="checkout-empty container" data-checkout-empty hidden>
-      Your cart is empty. <a class="link-underline" href="shop.html">Continue shopping</a>
-    </p>
+    <p class="container" data-account-checking>Checking…</p>
 
-    <div class="checkout container" data-checkout-form-section hidden>
-      <form class="checkout-form" data-checkout-form novalidate>
-        <fieldset class="checkout-fieldset">
-          <legend>Contact</legend>
-          <div class="form-field">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required maxlength="200" autocomplete="name">
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel">
-            </div>
-            <div class="form-field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email" maxlength="255" autocomplete="email">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Fulfilment</legend>
-          <div class="fulfilment-options">
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="delivery" checked>
-              Delivery
-            </label>
-            <label class="fulfilment-option">
-              <input type="radio" name="fulfilment_method" value="pickup">
-              Pickup
-            </label>
-          </div>
-
-          <div data-delivery-fields>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="region">Region</label>
-                <select id="region" name="region" data-region-select required>
-                  <option value="" disabled selected>Select region</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" maxlength="100" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="area">Area</label>
-                <input type="text" id="area" name="area" maxlength="100" required>
-              </div>
-              <div class="form-field">
-                <label for="address">Detailed Address</label>
-                <input type="text" id="address" name="address" maxlength="500" required>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="checkout-fieldset">
-          <legend>Order Note</legend>
-          <div class="form-field">
-            <label for="customer_note">Anything we should know? (optional)</label>
-            <textarea id="customer_note" name="customer_note" rows="3" maxlength="1000"></textarea>
-          </div>
-        </fieldset>
-
-        <p class="checkout-error" data-checkout-error hidden></p>
-
-        <button type="submit" class="button-primary checkout-submit" data-checkout-submit>Place Order</button>
+    <div class="container account-panel" data-account-logged-out hidden>
+      <form class="account-form" data-signin-form novalidate>
+        <div class="form-field">
+          <label for="signin-email">Email</label>
+          <input type="email" id="signin-email" name="email" required autocomplete="username">
+        </div>
+        <div class="form-field">
+          <label for="signin-password">Password</label>
+          <input type="password" id="signin-password" name="password" required autocomplete="current-password">
+        </div>
+        <p class="account-message account-message--error" data-signin-error hidden></p>
+        <button type="submit" class="button-primary account-form-submit">Sign In</button>
+        <p class="account-switch"><button type="button" data-forgot-link>Forgot password?</button></p>
+        <p class="account-switch">New here? <button type="button" data-show-signup>Create an account</button></p>
       </form>
 
-      <aside class="checkout-summary">
-        <h2>Order Summary</h2>
-        <div data-checkout-items></div>
-        <div class="checkout-totals">
-          <div class="checkout-line"><span>Subtotal</span><span data-checkout-subtotal>GH₵0.00</span></div>
-          <div class="checkout-line"><span>Delivery</span><span data-checkout-fee>—</span></div>
-          <div class="checkout-line checkout-line--total"><span>Total</span><span data-checkout-total>GH₵0.00</span></div>
+      <form class="account-form" data-signup-form hidden novalidate>
+        <div class="form-field">
+          <label for="signup-name">Full Name</label>
+          <input type="text" id="signup-name" name="full_name" required maxlength="200" autocomplete="name">
         </div>
-      </aside>
+        <div class="form-field">
+          <label for="signup-phone">Phone</label>
+          <input type="tel" id="signup-phone" name="phone" required maxlength="30" autocomplete="tel">
+        </div>
+        <div class="form-field">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" name="email" required autocomplete="username">
+        </div>
+        <div class="form-field">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" name="password" required minlength="8" autocomplete="new-password">
+        </div>
+        <p class="account-message account-message--error" data-signup-error hidden></p>
+        <button type="submit" class="button-primary account-form-submit">Create Account</button>
+        <p class="account-switch">Already have an account? <button type="button" data-show-signin>Sign in</button></p>
+      </form>
+
+      <form class="account-form" data-reset-form hidden novalidate>
+        <div class="form-field">
+          <label for="reset-email">Email</label>
+          <input type="email" id="reset-email" name="email" required autocomplete="username">
+        </div>
+        <p class="account-message" data-reset-message hidden></p>
+        <button type="submit" class="button-primary account-form-submit">Send Reset Link</button>
+        <p class="account-switch"><button type="button" data-reset-cancel>Back to Sign In</button></p>
+      </form>
+
+      <form class="account-form" data-recovery-form hidden novalidate>
+        <div class="form-field">
+          <label for="recovery-password">New Password</label>
+          <input type="password" id="recovery-password" name="password" required minlength="8" autocomplete="new-password">
+        </div>
+        <div class="form-field">
+          <label for="recovery-confirm">Confirm New Password</label>
+          <input type="password" id="recovery-confirm" name="confirm" required minlength="8" autocomplete="new-password">
+        </div>
+        <p class="account-message" data-recovery-message hidden></p>
+        <button type="submit" class="button-primary account-form-submit">Set New Password</button>
+      </form>
+    </div>
+
+    <div class="container account-body" data-account-logged-in hidden>
+      <div class="account-card">
+        <h2>Welcome, <span data-account-name>there</span></h2>
+        <form class="account-form" data-profile-form novalidate>
+          <div class="form-field">
+            <label for="profile-name">Full Name</label>
+            <input type="text" id="profile-name" name="full_name" required maxlength="200">
+          </div>
+          <div class="form-field">
+            <label for="profile-phone">Phone</label>
+            <input type="tel" id="profile-phone" name="phone" required maxlength="30">
+          </div>
+          <div class="form-field">
+            <label for="profile-email">Email</label>
+            <input type="email" id="profile-email" name="email">
+          </div>
+          <p class="account-message" data-profile-message hidden></p>
+          <button type="submit" class="button-secondary account-form-submit">Save Changes</button>
+        </form>
+        <p class="account-switch"><button type="button" data-account-signout>Sign Out</button></p>
+      </div>
+
+      <div class="account-card">
+        <h2>Order History</h2>
+        <div class="account-orders" data-account-orders></div>
+        <p class="account-empty" data-account-orders-empty hidden>No orders yet — your past orders will show up here once you've checked out.</p>
+      </div>
     </div>
   </main>
 
@@ -198,17 +205,15 @@
     import { initHeaderScrollState, initMobileNav } from './js/motion.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
-    import { initAccountHeaderState } from './js/store/customer-auth.js';
-    import { initCheckoutPage } from './js/store/checkout.js';
+    import { initAccountPage } from './js/store/account.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
     initMobileNav();
     initCartBadge();
-    initWishlistBadge();
-    initAccountHeaderState();
     initCartDrawer();
-    initCheckoutPage();
+    initWishlistBadge();
+    initAccountPage();
   </script>
 
   <a class="whatsapp-button" href="https://wa.me/233549436004" target="_blank" rel="noopener" aria-label="WhatsApp Us">

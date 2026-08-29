@@ -43,6 +43,9 @@
         <button type="button" class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
+        <a class="wishlist-header-link" href="account.html" aria-label="Account" data-account-header-link>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </a>
         <a class="wishlist-header-link" href="wishlist.html" aria-label="Wishlist">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
           <span class="wishlist-header-link__count" data-wishlist-count hidden>0</span>
@@ -180,12 +183,14 @@
     import { initProductPage } from './js/store/products.js';
     import { initCartBadge, initCartDrawer } from './js/store/cart.js';
     import { initWishlistBadge } from './js/store/wishlist.js';
+    import { initAccountHeaderState } from './js/store/customer-auth.js';
 
     document.querySelector('[data-year]').textContent = new Date().getFullYear();
     initHeaderScrollState();
     initMobileNav();
     initCartBadge();
     initWishlistBadge();
+    initAccountHeaderState();
     initCartDrawer();
     initProductPage();
   </script>

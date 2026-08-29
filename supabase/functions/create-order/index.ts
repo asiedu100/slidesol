@@ -2,6 +2,7 @@ import { handleCorsPreflight } from '../_shared/cors.ts';
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
 import { createAdminClient } from '../_shared/supabase-admin.ts';
 import { initializeTransaction } from '../_shared/paystack.ts';
+import { tryResolveCustomer } from '../_shared/require-customer.ts';
 import {
   CURRENCY, GHANA_REGIONS, MAX_ITEM_QUANTITY, ORDER_STATUS, ORDER_TYPE,
   ORDER_PAYMENT_STATUS, PAYMENT_STATUS, getDeliveryFee,
@@ -237,39 +238,49 @@ Deno.serve(async (req) => {
   const totalAmount = subtotal + deliveryFee;
   const orderType = hasPreorderLine ? ORDER_TYPE.PREORDER : ORDER_TYPE.STANDARD;
 
-  // Find-or-create the guest customer, matched by phone (required; closer to a natural
-  // key than the optional email). An existing match is reused as-is rather than
-  // overwritten, so one guest's typo can't silently corrupt another customer's record.
+  // Signed-in customer session takes priority — never trust a client-supplied customer
+  // id, only what the verified token itself resolves to. A missing/invalid/anon-key
+  // token (i.e. every guest checkout, exactly as before) just resolves to null here and
+  // falls straight through to the existing phone-match-or-create flow, unchanged.
+  const sessionCustomer = await tryResolveCustomer(req);
+
   let customerId: string;
-  const { data: existingCustomer, error: findCustomerError } = await supabase
-    .from('customers')
-    .select('id')
-    .eq('phone', payload.customer.phone)
-    .maybeSingle();
-
-  if (findCustomerError) {
-    console.error('create-order: failed to look up customer', findCustomerError);
-    return errorResponse(500, 'server_error', 'Could not process your order. Please try again.');
-  }
-
-  if (existingCustomer) {
-    customerId = existingCustomer.id;
+  if (sessionCustomer) {
+    customerId = sessionCustomer.id;
   } else {
-    const { data: newCustomer, error: createCustomerError } = await supabase
+    // Find-or-create the guest customer, matched by phone (required; closer to a natural
+    // key than the optional email). An existing match is reused as-is rather than
+    // overwritten, so one guest's typo can't silently corrupt another customer's record.
+    const { data: existingCustomer, error: findCustomerError } = await supabase
       .from('customers')
-      .insert({
-        full_name: payload.customer.full_name,
-        phone: payload.customer.phone,
-        email: payload.customer.email,
-      })
       .select('id')
-      .single();
+      .eq('phone', payload.customer.phone)
+      .maybeSingle();
 
-    if (createCustomerError || !newCustomer) {
-      console.error('create-order: failed to create customer', createCustomerError);
+    if (findCustomerError) {
+      console.error('create-order: failed to look up customer', findCustomerError);
       return errorResponse(500, 'server_error', 'Could not process your order. Please try again.');
     }
-    customerId = newCustomer.id;
+
+    if (existingCustomer) {
+      customerId = existingCustomer.id;
+    } else {
+      const { data: newCustomer, error: createCustomerError } = await supabase
+        .from('customers')
+        .insert({
+          full_name: payload.customer.full_name,
+          phone: payload.customer.phone,
+          email: payload.customer.email,
+        })
+        .select('id')
+        .single();
+
+      if (createCustomerError || !newCustomer) {
+        console.error('create-order: failed to create customer', createCustomerError);
+        return errorResponse(500, 'server_error', 'Could not process your order. Please try again.');
+      }
+      customerId = newCustomer.id;
+    }
   }
 
   const orderNumber = generateOrderNumber();

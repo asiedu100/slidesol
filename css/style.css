@@ -629,6 +629,8 @@ h1, h2, h3 {
   color: inherit;
 }
 
+.wishlist-header-link.is-active { color: var(--color-clay); }
+
 .wishlist-header-link__count {
   position: absolute;
   top: -6px;
